@@ -94,7 +94,9 @@ export class RollbackService extends Service {
 
   constructor(ctx: Context, config: Config) {
     super(ctx, 'rollback')
-    this.jobStopTimeoutMs = config.jobStopTimeoutMs
+    const timeout = config.jobStopTimeoutMs
+    if (timeout === undefined) throw new Error('rollback jobStopTimeoutMs is missing after config parse')
+    this.jobStopTimeoutMs = timeout
   }
 
   protected async [Service.init](): Promise<void> {
