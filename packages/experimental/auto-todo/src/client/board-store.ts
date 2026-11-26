@@ -5,7 +5,7 @@
 
 import { defineStore } from '@deepseek-ai/dsh-client-store'
 import {
-  addNote, addTask, applyClassify, applyDrop, applyStandardize, clearDay, deleteNote, deleteTag, deleteTask,
+  addNote, addTask, addTaskTags, applyDrop, clearDay, deleteNote, deleteTag, deleteTask,
   dissolveGroup, emptyBoard, isoDate, moveToInspiration, renameGroup, resetBoard, saveTag, setCompleted,
   setInspirationStatus, setListHeight, setViewedDate, syncDay, togglePin, toggleTaskTag, updateNote, updateTask,
   type Board, type Column, type DragSubject, type DropTarget, type Inspiration, type Tag, type TaskPatch,
@@ -37,8 +37,7 @@ export function createBoardStore() {
       deleteTask: (draft, id: string) => { deleteTask(draft, id) },
       moveToInspiration: (draft, id: string, now: number) => { moveToInspiration(draft, id, now) },
       setInspirationStatus: (draft, id: string, status: Inspiration['status']) => { setInspirationStatus(draft, id, status) },
-      standardize: (draft, id: string) => { applyStandardize(draft, id) },
-      classify: (draft, id: string) => { applyClassify(draft, id) },
+      addTaskTags: (draft, id: string, tagIds: string[]) => { addTaskTags(draft, id, tagIds) },
       syncDay: (draft, source: string, target: string) => { syncDay(draft, source, target) },
       clearDay: (draft, date: string) => { clearDay(draft, date) },
       renameGroup: (draft, id: string, title: string) => { renameGroup(draft, id, title) },

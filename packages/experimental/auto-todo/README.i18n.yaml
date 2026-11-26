@@ -3,35 +3,44 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/experimental/auto-todo/README.md
 /:
-  en: 6382ddf5645f2d45
-  zh: c3aa310745056bfa
+  en: 670a30c11218411b
+  zh: 046294ae05199c33
 /deepseek-ai-dsh-client-ui-auto-todo:
   en: cbfcf67acd2c172f
   zh: 9428cb3f69056119
 /deepseek-ai-dsh-client-ui-auto-todo/summary:
-  en: 5968bd1ef9e1fdf1
-  zh: 58c305bab28ce6c2
+  en: 95457ff4383f8037
+  zh: 6daaff3ca9c78f64
 /deepseek-ai-dsh-client-ui-auto-todo/table-of-contents:
   en: 76368b6b1da79c80
   zh: 03a4bf09d960f762
 /deepseek-ai-dsh-client-ui-auto-todo/use-this-package:
-  en: 86c7c93b2676336f
-  zh: a8f24963c6bf0d73
+  en: 256469c3092192de
+  zh: e6c62684c26d461e
 /deepseek-ai-dsh-client-ui-auto-todo/use-this-package/minimal-configuration:
-  en: ffbe1c759ab17001
-  zh: 7bd88c13f8ff5407
+  en: 22d4068600190cba
+  zh: 85853d7d258b697a
 /deepseek-ai-dsh-client-ui-auto-todo/understand-the-implementation:
-  en: 05fcebfd4a9d9a82
-  zh: ae20584812b88ccb
+  en: 1247c20e4df2af9e
+  zh: 174846e1fbe85e76
 /deepseek-ai-dsh-client-ui-auto-todo/model-experience:
-  en: 2c69a6676c7aa931
-  zh: 5480814bf8e7b506
-/deepseek-ai-dsh-client-ui-auto-todo/model-experience/kv-cache-effect:
-  en: 29d8df32cfbe7b35
-  zh: 85a0b234f2dfac2f
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-client-ui-auto-todo/model-experience/classification-and-tag-descriptions:
+  en: a81c1b94cfc73660
+  zh: e6638b5483e9ed2b
+/deepseek-ai-dsh-client-ui-auto-todo/model-experience/classification-and-tag-descriptions/what-the-model-sees:
+  en: 3a8208339e729804
+  zh: eea9bf65dd940f1c
+/deepseek-ai-dsh-client-ui-auto-todo/model-experience/classification-and-tag-descriptions/token-effect:
+  en: ca445a41bc3de135
+  zh: f6cd6a5dd4c986b5
+/deepseek-ai-dsh-client-ui-auto-todo/model-experience/classification-and-tag-descriptions/kv-cache-effect:
+  en: 32ced303466edbed
+  zh: 7f136535ca08c724
 /deepseek-ai-dsh-client-ui-auto-todo/known-limitations-and-deferred-work:
-  en: 70fe812aaea148db
-  zh: 725c53d58067e900
+  en: f01cd3bef47ecbef
+  zh: d467e47f68d79db7
 /deepseek-ai-dsh-client-ui-auto-todo/known-limitations-and-deferred-work/dev-note:
   en: e67f633dc6fe7773
   zh: bd8a8936229e035e

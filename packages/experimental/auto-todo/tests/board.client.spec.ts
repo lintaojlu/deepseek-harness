@@ -2,11 +2,11 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  AI_NOTE, HUMAN_NOTE, addDays, addNote, addTask, applyClassify, applyDrop, applyStandardize, barTags,
-  classifiedColumn, clampListHeight, clearDay, columnNotice, copyBody, decomposeLines, deleteNote, deleteTag,
+  AI_NOTE, HUMAN_NOTE, addDays, addNote, addTask, addTaskTags, applyDrop, barTags,
+  clampListHeight, clearDay, columnNotice, copyBody, deleteNote, deleteTag,
   deleteTask, dissolveGroup, edgeIndex, elapsedDays, emptyBoard, focusAvailable, isBoard, isoDate, livesOnlyOn,
   moveToInspiration, mustOn, noteLines, passedDragThreshold, pointerBand, renameGroup, resetBoard, rowsFor,
-  saveTag, setCompleted, setInspirationStatus, setListHeight, setViewedDate, standardizedTitle, syncDay,
+  saveTag, setCompleted, setInspirationStatus, setListHeight, setViewedDate, syncDay,
   timeSpans, togglePin, toggleTaskTag, unfinishedCount, unfinishedDays, updateNote, updateTask, visibleOn,
   weekStart, weekdayIndex, type Board, type Task,
 } from '../src/client/board-model.ts'
@@ -132,29 +132,17 @@ describe('board model', () => {
     expect(draft.tasks).toEqual([])
   })
 
-  it('tidies, classifies, splits, syncs, and clears a day', () => {
-    expect(standardizedTitle('  1.  写   文档 ')).toBe('写 文档')
-    expect(standardizedTitle(' 1. ')).toBeNull()
-    expect(classifiedColumn('没有关键词')).toBeNull()
-    expect(classifiedColumn('optional 选做')).toBe('optional')
-    expect(classifiedColumn('must 必做')).toBe('must')
-    expect(classifiedColumn('必做然后选做')).toBe('must')
-    expect(classifiedColumn('选做然后必做')).toBe('optional')
-    expect(decomposeLines('写文档，再核对、发出去和归档')).toEqual(['写文档', '再核对', '发出去', '归档'])
-    expect(decomposeLines('  单独  ')).toEqual(['单独'])
-    expect(decomposeLines('   ')).toEqual(['   '])
+  it('adds existing tags without moving a task, syncs unfinished tasks, and clears a day', () => {
     const draft = board()
-    expect(applyStandardize(draft, 'missing')).toBe(false)
-    expect(applyClassify(draft, 'missing')).toBe(false)
-    const tidy = task(draft, 'optional', '1. 必做 收尾')
-    expect(applyStandardize(draft, tidy.id)).toBe(true)
-    expect(applyStandardize(draft, tidy.id)).toBe(true)
-    expect(applyClassify(draft, tidy.id)).toBe(true)
-    expect(tidy.column).toBe('must')
+    const assigned = task(draft, 'optional', '收尾')
+    const oldTag = saveTag(draft, { name: '工作', color: 'blue', description: '' })!
+    const newTag = saveTag(draft, { name: '收尾', color: 'red', description: '' })!
+    toggleTaskTag(draft, assigned.id, oldTag)
+    addTaskTags(draft, 'missing', [newTag])
+    addTaskTags(draft, assigned.id, [oldTag, newTag, newTag, 'missing'])
+    expect(assigned.tagIds).toEqual([oldTag, newTag])
+    expect(assigned.column).toBe('optional')
     const plain = task(draft, 'must', '没有')
-    expect(applyClassify(draft, plain.id)).toBe(false)
-    const emptyTitle = task(draft, 'must', '1.')
-    expect(applyStandardize(draft, emptyTitle.id)).toBe(false)
     const other = task(draft, 'must', '另一天', '2026-11-25')
     syncDay(draft, DAY, DAY)
     syncDay(draft, '2026-11-25', DAY)
@@ -281,7 +269,7 @@ describe('board model', () => {
     expect(rowsFor(draft, 'must', DAY, []).every(row => row.kind !== 'group')).toBe(true)
     draft.tasks = draft.tasks.filter(item => item.groupId !== groupId)
     const mover = task(draft, 'optional', '必做 搬走')
-    expect(applyClassify(draft, mover.id)).toBe(true)
+    applyDrop(draft, { kind: 'task', id: mover.id }, { kind: 'append', column: 'must' })
     expect(draft.groups).toEqual([])
     tied.extraDates = ['2026-11-01', '2026-12-02']
     tied.due = '2026-12-01'
@@ -392,8 +380,6 @@ describe('dictionaries and store', () => {
     const instance = createBoardStore().create('board-spec')
     instance.actions.addTask('must', '必做 记录', DAY, [], 1)
     const id = instance.getSnapshot().tasks[0]!.id
-    instance.actions.classify(id)
-    instance.actions.standardize(id)
     instance.actions.updateTask(id, { recurrence: 'weekday' })
     instance.actions.addNote(id, '备注')
     const noteId = instance.getSnapshot().tasks[0]!.notes[0]!.id
@@ -401,7 +387,7 @@ describe('dictionaries and store', () => {
     instance.actions.saveTag('工作', 'blue', '说明')
     instance.actions.saveTag('工作', 'green', '改过', instance.getSnapshot().tags[0]!.id)
     const tagId = instance.getSnapshot().tags[0]!.id
-    instance.actions.toggleTaskTag(id, tagId)
+    instance.actions.addTaskTags(id, [tagId])
     instance.actions.togglePin(tagId)
     instance.actions.setCompleted(id, DAY, true)
     instance.actions.syncDay('2026-11-25', DAY)

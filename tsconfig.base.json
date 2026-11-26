@@ -82,6 +82,7 @@
       "@deepseek-ai/dsh-client-ui-ceos/client": ["./packages/experimental/client-ui-ceos/src/client/index.ts"],
       "@deepseek-ai/dsh-client-ui-auto-todo": ["./packages/experimental/auto-todo/src/index.ts"],
       "@deepseek-ai/dsh-client-ui-auto-todo/client": ["./packages/experimental/auto-todo/src/client/index.ts"],
+      "@deepseek-ai/dsh-client-ui-auto-todo/types": ["./packages/experimental/auto-todo/src/types.ts"],
       "@deepseek-ai/dsh-experimental-client-ui-cot-translation/types": ["./packages/experimental/client-ui-cot-translation/src/types.ts"],
       "@deepseek-ai/dsh-experimental-client-ui-cot-translation/client": ["./packages/experimental/client-ui-cot-translation/src/client/index.ts"],
       "@deepseek-ai/dsh-experimental-cot-translation-bundle": ["./packages/experimental/cot-translation-bundle/src/index.ts"],

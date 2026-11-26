@@ -3,57 +3,46 @@
  * Edits commit immediately. The page keeps only viewing state of its own.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
-import { Menu, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { InjectFace, PropsLocale, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
+import { useEffect, useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
+import { Button, IconDatabaseOutlineRegular, IconChecklistOutlineRegular, Input, Menu, Modal } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { HostObservable, InjectFace, PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { TaskClassification } from '../types.ts'
 import {
-  AI_NOTE, addDays, barTags, classifiedColumn, columnNotice, copyBody, decomposeLines, edgeIndex,
-  focusAvailable, isBoard, isoDate, passedDragThreshold, pointerBand, rowsFor, standardizedTitle, timeSpans,
-  unfinishedCount, unfinishedDays, visibleOn, weekdayIndex, weekStart,
-  type Board, type Column, type DragSubject, type DropTarget, type TagColor, type Task,
+  addDays, barTags, columnNotice, copyBody, edgeIndex,
+  isBoard, isoDate, passedDragThreshold, pointerBand, rowsFor,
+  unfinishedCount, unfinishedDays, weekdayIndex, weekStart,
+  type Board, type Column, type DragSubject, type DropTarget, type Task,
 } from './board-model.ts'
 import {
   activity, clampHeatEnd, columnRate, heatOrigin, heatWeeks, percentOf, rateBetween, tagInsight,
   type HeatCell,
 } from './board-stats.ts'
-import type { createBoardStore } from './board-store.ts'
-import type { AutoTodoKey } from './locales.ts'
+import type { BoardActions } from './board-store.ts'
+import type { ModelActions } from './model-actions.ts'
+import { ModelSettings } from './ModelSettings.tsx'
+import { EditTag, type TagDraft } from './EditTag.tsx'
+import { Glyph, submitEnter, tagPaint, TaskInput, TaskRow, type ActivityState } from './TaskControls.tsx'
 import css from './AutoTodoPage.module.css'
 
-/** Clock injected for the panel so tests can pin “today”. */
+/** Services injected into the daily task board. */
 export interface AutoTodoInjected {
   /** Current time in epoch milliseconds. */
   now: () => number
+  actions: BoardActions
+  model: ModelActions
+  hooks: { board: HostObservable<Board> }
 }
 
 /** Framework props for the tasks main panel. */
-export type AutoTodoPageProps = PropsRuntime<'main'>
-  & PropsStore<ReturnType<typeof createBoardStore>>
-  & InjectFace<AutoTodoInjected>
-  & PropsLocale<'autoTodo'>
+export type AutoTodoPageProps = InjectFace<AutoTodoInjected> & PropsLocale<'autoTodo'>
 
-type PageId = 'tasks' | 'stats'
-type ActivityState = 'classifying' | 'standardizing' | 'classifyFailed' | 'standardizeFailed'
-type Translate = AutoTodoPageProps['t']
+type PageId = 'tasks' | 'stats' | 'settings'
+/** Daily task dictionary translator. */
+export type Translate = AutoTodoPageProps['t']
 
-const COLORS: readonly TagColor[] = ['white', 'orange', 'amber', 'green', 'cyan', 'blue', 'violet', 'pink', 'red']
-const LIGHT_HEX = new Set(['#ffffff', '#fa6710', '#f79410', '#14c370', '#15b8a4'])
-
-function tagPaint(color: string): { className: string; style?: { background: string; color: string } } {
-  if (color.startsWith('#')) {
-    const ink = LIGHT_HEX.has(color.toLowerCase()) ? '#141414' : '#ffffff'
-    return { className: '', style: { background: color, color: ink } }
-  }
-  if (!(COLORS as readonly string[]).includes(color)) return { className: '' }
-  return { className: css[`swatch-${color}`] ?? '' }
-}
 const WEEKDAYS = ['weekday.0', 'weekday.1', 'weekday.2', 'weekday.3', 'weekday.4', 'weekday.5', 'weekday.6'] as const
 const SHORT_WEEKDAYS = ['weekday.short.0', 'weekday.short.1', 'weekday.short.2', 'weekday.short.3', 'weekday.short.4', 'weekday.short.5', 'weekday.short.6'] as const
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => { window.setTimeout(resolve, ms) })
-}
 
 function dayText(iso: string, t: Translate): string {
   const [year, month, day] = iso.split('-')
@@ -66,21 +55,13 @@ function clock(ms: number): string {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
-function submitEnter(event: ReactKeyboardEvent, submit: () => void): void {
-  if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
-  event.preventDefault()
-  submit()
-}
-
 /**
  * Render the tasks panel.
  * @param props - board store, clock, and copy.
  * @returns the tasks or stats page.
  */
-type AutoTodoPageInput = Pick<AutoTodoPageProps, 'useStore' | 'actions' | 'now' | 't'>
-
-export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
-  const stored = useStore(state => state)
+export function AutoTodoPage({ useBoard, actions, model, now, t }: AutoTodoPageProps) {
+  const stored = useBoard(state => state)
   const board = isBoard(stored) ? stored : null
   const [page, setPage] = useState<PageId>('tasks')
   const [width, setWidth] = useState(() => window.innerWidth || 1280)
@@ -89,14 +70,12 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
   const [editing, setEditing] = useState<string | null>(null)
   const [menu, setMenu] = useState<{ x: number; y: number; subject: DragSubject } | null>(null)
   const [activityState, setActivityState] = useState<Record<string, ActivityState>>({})
-  const [decomposing, setDecomposing] = useState<string | null>(null)
-  const [composer, setComposer] = useState('')
-  const [composerColumn, setComposerColumn] = useState<Column>('must')
   const [syncOpen, setSyncOpen] = useState(false)
   const [syncDate, setSyncDate] = useState('')
   const [clearOpen, setClearOpen] = useState(false)
-  const [tagsOpen, setTagsOpen] = useState(false)
-  const [tagDraft, setTagDraft] = useState<{ id?: string; name: string; description: string; color: string }>({ name: '', description: '', color: 'blue' })
+  const [settingsPage, setSettingsPage] = useState<'model' | 'tags'>('model')
+  const [tagDraft, setTagDraft] = useState<TagDraft | null>(null)
+  const classifications = useRef(new Map<string, AbortController>())
   const [focus, setFocus] = useState<{ taskId: string; phase: 'pick' | 'running' | 'done'; minutes: number; remaining: number; deadline: number } | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [noteEdit, setNoteEdit] = useState<{ taskId: string; noteId: string | null; draft: string } | null>(null)
@@ -126,6 +105,10 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
   useEffect(() => () => {
     if (filterTimer.current !== null) window.clearTimeout(filterTimer.current)
   }, [])
+  useEffect(() => {
+    const pending = classifications.current
+    return () => { pending.forEach((controller) => { controller.abort() }); pending.clear() }
+  }, [])
 
   useEffect(() => {
     if (focus?.phase !== 'running') return undefined
@@ -142,7 +125,7 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
   useEffect(() => {
     const node = heatRef.current
     if (node === null || page !== 'stats') return undefined
-    const measure = (): void => { setHeatWidth(Math.max(node.clientWidth, 320)) }
+    const measure = (): void => { setHeatWidth(node.clientWidth || 320) }
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(node)
@@ -161,42 +144,44 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
   }
 
   const narrow = width < 960
-  const editingTask = editing === null ? undefined : board.tasks.find(task => task.id === editing)
-  const dialogTask = editingTask !== undefined && visibleOn(editingTask, board.viewedDate) ? editingTask : undefined
-  const hour = new Date(now()).getHours()
+  const dialogTask = editing === null ? undefined : board.tasks.find(task => task.id === editing)
 
-  async function tidy(id: string, mode: 'both' | 'standardize' | 'classify'): Promise<void> {
-    const read = (): Task | undefined => boardRef.current?.tasks.find(task => task.id === id)
-    if (mode !== 'classify') {
-      setActivityState(state => ({ ...state, [id]: 'standardizing' }))
-      await delay(20)
-      const current = read()
-      /* v8 ignore next -- the task can be removed during the 20ms pause. */
-      if (current === undefined) return
-      if (standardizedTitle(current.title) === null) {
-        setActivityState(state => ({ ...state, [id]: 'standardizeFailed' }))
-        return
-      }
-      actions.standardize(id)
-      if (mode === 'standardize') {
-        clearActivity(id)
-        return
-      }
-    }
-    /* v8 ignore next -- the task can be removed during the 20ms pause. */
-    if (read() === undefined) return
-    setActivityState(state => ({ ...state, [id]: 'classifying' }))
-    await delay(20)
-    const current = read()
-    /* v8 ignore next -- the task can be removed during the 20ms pause. */
-    if (current === undefined) return
-    const title = standardizedTitle(current.title) ?? current.title
-    if (classifiedColumn(title) === null) {
-      setActivityState(state => ({ ...state, [id]: 'classifyFailed' }))
+  async function classify(task: Task, source: Board): Promise<void> {
+    if (classifications.current.has(task.id)) return
+    if (source.tags.length === 0) {
+      setActivityState(state => ({ ...state, [task.id]: 'classifyNoTags' }))
       return
     }
-    actions.classify(id)
-    clearActivity(id)
+    const candidates = source.tags.filter(tag => !task.tagIds.includes(tag.id))
+    if (candidates.length === 0) {
+      clearActivity(task.id)
+      return
+    }
+    const input: TaskClassification = {
+      title: task.title,
+      notes: task.notes.map(note => note.text),
+      assignedTags: source.tags.filter(tag => task.tagIds.includes(tag.id)).map(({ name, description }) => ({ name, description })),
+      candidates: candidates.map(({ name, description }) => ({ name, description })),
+    }
+    const controller = new AbortController()
+    classifications.current.set(task.id, controller)
+    setActivityState(state => ({ ...state, [task.id]: 'classifying' }))
+    try {
+      const indexes = await model.classify(input, controller.signal)
+      if (controller.signal.aborted) return
+      const currentBoard = boardRef.current
+      const current = currentBoard?.tasks.find(item => item.id === task.id)
+      if (currentBoard?.tags === source.tags && current?.title === task.title
+        && current.notes === task.notes && current.tagIds === task.tagIds) {
+        const tagIds = indexes.flatMap(index => candidates[index]?.id ?? [])
+        actions.addTaskTags(task.id, tagIds)
+      }
+      clearActivity(task.id)
+    } catch (_error) {
+      if (!controller.signal.aborted) setActivityState(state => ({ ...state, [task.id]: 'classifyFailed' }))
+    } finally {
+      if (classifications.current.get(task.id) === controller) classifications.current.delete(task.id)
+    }
   }
 
   function clearActivity(id: string): void {
@@ -209,10 +194,8 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
 
   function add(column: Column, title: string): void {
     if (title.trim() === '' || board === null) return
-    const id = `t${board.seq + 1}`
     actions.addTask(column, title, board.viewedDate, filter, now())
     setDrafts(state => ({ ...state, [column]: '' }))
-    void tidy(id, 'both')
   }
 
   function targetAt(x: number, y: number, subject: DragSubject): DropTarget | null {
@@ -333,31 +316,14 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
     }
   }
 
-  function decompose(task: Task): void {
-    setDecomposing(task.id)
-    window.setTimeout(() => {
-      setDecomposing(null)
-      setComposer(decomposeLines(task.title).join('\n'))
-      setComposerColumn(task.column)
-    }, 280)
-  }
-
-  function commitComposer(): void {
-    const current = boardRef.current
-    if (current === null) return
-    for (const line of composer.split('\n')) {
-      if (line.trim() !== '') actions.addTask(composerColumn, line, current.viewedDate, filter, now())
-    }
-    setComposer('')
-  }
-
   const menuTask = menu?.subject.kind === 'task' ? board.tasks.find(task => task.id === menu.subject.id) : undefined
-  const busy = menuTask !== undefined && (activityState[menuTask.id] === 'classifying' || activityState[menuTask.id] === 'standardizing')
+  const busy = menuTask !== undefined && activityState[menuTask.id] === 'classifying'
   const viewedUnfinished = unfinishedCount(board, board.viewedDate)
   const sourceUnfinished = syncDate === '' ? 0 : unfinishedCount(board, syncDate)
   const syncReason = viewedUnfinished === 0 ? 'sync.none'
-    : syncDate === '' || syncDate === board.viewedDate ? 'sync.sameDay'
-      : sourceUnfinished === 0 ? 'sync.empty' : null
+    : syncDate === '' ? 'sync.pick'
+      : syncDate === board.viewedDate ? 'sync.sameDay'
+        : sourceUnfinished === 0 ? 'sync.empty' : null
 
   function heatCopy(cell: HeatCell): { date: string; detail: string } {
     const [year, month, day] = cell.date.split('-')
@@ -381,7 +347,9 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
 
   const origin = heatOrigin(board, today)
   const end = clampHeatEnd(heatEnd ?? weekStart(today), today, origin)
-  const weekCount = Math.max(4, Math.floor((heatWidth - 36) / 16))
+  const heatGap = heatWidth < 420 ? 3 : 5
+  const heatSize = heatWidth < 420 ? 10 : 16
+  const weekCount = Math.min(53, Math.max(4, Math.floor((heatWidth - 16) / (heatSize + heatGap))))
   const weeks = heatWeeks(board, today, end, weekCount)
   const atStart = end === weekStart(origin)
   const atEnd = end === weekStart(today)
@@ -398,10 +366,10 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
       <div className={css.main}>
         <header className={css.header}>
           <nav className={css.switcher} aria-label={t('panel')}>
-            {(['tasks', 'stats'] as const).map(id => (
+            {(['tasks', 'stats', 'settings'] as const).map(id => (
               <button key={id} type="button" className={page === id ? css.switchOn : css.switchBtn} aria-current={page === id ? 'page' : undefined}
                 onClick={() => { setPage(id); setTooltip(null) }}>
-                {t(id === 'stats' ? 'nav.stats' : 'nav.tasks')}
+                {t(`nav.${id}`)}
               </button>
             ))}
           </nav>
@@ -429,17 +397,18 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                       <span>{t(column === 'must' ? 'column.must' : 'column.optional')}</span>
                       {column === 'must' && <Ring rate={rate} label={rate === null ? t('column.progressEmpty') : t('column.progress', { percent: percentOf(rate) })} />}
                     </div>
-                    <input aria-label={t(column === 'must' ? 'add.must' : 'add.optional')} placeholder={t(column === 'must' ? 'add.must' : 'add.optional')}
-                      value={drafts[column]} onChange={(event) => { setDrafts(state => ({ ...state, [column]: event.target.value })) }}
-                      onKeyDown={(event) => { submitEnter(event, () => { add(column, drafts[column]) }) }} />
+                    <TaskInput label={t(column === 'must' ? 'add.must' : 'add.optional')} value={drafts[column]}
+                      onChange={(value) => { setDrafts(state => ({ ...state, [column]: value })) }}
+                      onSubmit={(title) => { add(column, title) }} />
                     <div className={css.list} data-column-body data-column={column}>
                       {notice !== null && <p className={css.empty}>{t(notice === 'empty' ? 'empty.column' : 'empty.filtered')}</p>}
                       {rows.map((row, index) => {
                         const line = preview?.kind === 'insert' && preview.column === column && preview.index === index
                           ? <div key={`line-${column}-${index}`} className={css.insert} /> : null
                         if (row.kind === 'task') {
-                          return [line, <TaskRow key={row.task.id} task={row.task} board={board} today={today} t={t}
-                            activity={activityState[row.task.id]} decomposing={decomposing === row.task.id}
+                          return [line, <TaskRow key={row.task.id} task={row.task} tags={board.tags}
+                            date={board.viewedDate} today={today} t={t}
+                            activity={activityState[row.task.id]}
                             copied={copied === row.task.id} collapsed={dragging?.id === row.task.id && (preview?.kind === 'pair' || preview?.kind === 'join')}
                             paired={preview?.kind === 'pair' && preview.taskId === row.task.id ? board.tasks.find(item => item.id === dragging?.id)?.title : undefined}
                             onPointerDown={(event) => { onRowPointerDown(event, { kind: 'task', id: row.task.id }) }}
@@ -461,7 +430,7 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                           tasks={row.tasks}
                           column={column}
                           renaming={renaming === row.group.id} draft={renameDraft} t={t} board={board} today={today}
-                          activityState={activityState} decomposing={decomposing} copied={copied} dragging={dragging} preview={preview}
+                          activityState={activityState} copied={copied} dragging={dragging} preview={preview}
                           onRenameDraft={setRenameDraft}
                           onStartRename={() => { setRenaming(row.group.id); setRenameDraft(row.group.title) }}
                           onCommitRename={() => { actions.renameGroup(row.group.id, renameDraft); setRenaming(null) }}
@@ -512,7 +481,6 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                     onDoubleClick={() => {
                       window.clearTimeout(filterTimer.current as number)
                       setTagDraft({ id: tag.id, name: tag.name, description: tag.description, color: tag.color })
-                      setTagsOpen(true)
                     }}>
                     {tag.name}
                     <button
@@ -528,16 +496,52 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                   </span>
                 )
               })}
-              <button type="button" className={css.gear} aria-label={t('tags.settings')} onClick={() => { setTagDraft({ name: '', description: '', color: 'blue' }); setTagsOpen(true) }}>{'⚙'}</button>
             </div>
-            <textarea className={css.composer} aria-label={t('composer.placeholder')} placeholder={t('composer.placeholder')} value={composer}
-              onChange={(event) => { setComposer(event.target.value) }}
-              onKeyDown={(event) => { submitEnter(event, commitComposer) }} />
           </>
         )}
         {page === 'stats' && stats !== null && (
           <>
-            <p className={css.quote} title={t(`quote.${hour}` as AutoTodoKey)}>{t(`quote.${hour}` as AutoTodoKey)}</p>
+            <section className={css.card}>
+              <h2>{t('activity.title')}</h2>
+              <div className={css.activity}>
+                {([['activity.active', stats.activity.activeDays], ['activity.current', stats.activity.current], ['activity.longest', stats.activity.longest]] as const).map(([key, value]) => (
+                  <p key={key}><strong>{value}</strong><span>{t('activity.unit')}</span><small>{t(key)}</small></p>
+                ))}
+              </div>
+              <div ref={heatRef} className={css.heat} style={{ ['--heat-gap' as string]: `${heatGap}px`, ['--heat-size' as string]: `${heatSize}px` }}>
+                <div className={css.heatWeekdays}>
+                  {SHORT_WEEKDAYS.map(key => <span key={key}>{t(key)}</span>)}
+                </div>
+                <div className={css.heatGrid}>
+                  {weeks.map(week => (
+                    <div key={week.days[0]?.date} className={css.heatWeek}>
+                      {week.days.map((cell) => {
+                        const copy = heatCopy(cell)
+                        return (
+                          <div key={cell.date} role="gridcell" tabIndex={0} data-band={cell.band} data-heat-cell data-col={cell.date}
+                            className={css.cell} aria-label={`${copy.date} ${copy.detail}`}
+                            onMouseEnter={(event) => { showTip(cell, event.currentTarget) }}
+                            onMouseLeave={() => { setTooltip(null) }}
+                            onClick={(event) => { showTip(cell, event.currentTarget) }}
+                            onFocus={(event) => { showTip(cell, event.currentTarget) }}
+                            onBlur={() => { setTooltip(null) }} />
+                        )
+                      })}
+                      <span className={css.month}>{week.month === null ? '' : t('heatmap.month', { month: week.month })}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={css.legend}>
+                {(['none', 'zero', 'low', 'mid', 'high'] as const).map(band => (
+                  <span key={band}><i data-band={band} />{t(`heatmap.legend.${band}`)}</span>
+                ))}
+              </div>
+              <div className={css.heatNav}>
+                <button type="button" className={css.heatBtn} aria-label={t('heatmap.earlier')} disabled={atStart} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, -7 * weekCount), today, origin)) }}><Chevron dir="left" /></button>
+                <button type="button" className={css.heatBtn} aria-label={t('heatmap.later')} disabled={atEnd} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, 7 * weekCount), today, origin)) }}><Chevron dir="right" /></button>
+              </div>
+            </section>
             <section className={css.card}>
               <h2>{t('insights.title')}</h2>
               <div className={css.insights}>
@@ -561,46 +565,6 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                   body={stats.tags.completed === null ? t('insight.tags.none') : `${t('insight.tags.body', { count: stats.tags.completed })}${stats.tags.stalled.length === 0 ? '' : t('insight.tags.stalled', { names: stats.tags.stalled.join('、') })}`} />
               </div>
             </section>
-            <section className={css.card}>
-              <h2>{t('activity.title')}</h2>
-              <div className={css.activity}>
-                {([['activity.active', stats.activity.activeDays], ['activity.current', stats.activity.current], ['activity.longest', stats.activity.longest]] as const).map(([key, value]) => (
-                  <p key={key}><strong>{value}</strong><span>{t('activity.unit')}</span><small>{t(key)}</small></p>
-                ))}
-              </div>
-              <div ref={heatRef} className={css.heat}>
-                <div className={css.heatWeekdays}>
-                  {SHORT_WEEKDAYS.map(key => <span key={key}>{t(key)}</span>)}
-                </div>
-                <div className={css.heatGrid} style={{ columnGap: (heatWidth - 36 - weekCount * 16) / (weekCount - 1) }}>
-                  {weeks.map(week => (
-                    <div key={week.days[0]?.date} className={css.heatWeek}>
-                      {week.days.map((cell) => {
-                        const copy = heatCopy(cell)
-                        return (
-                          <div key={cell.date} role="gridcell" tabIndex={0} data-band={cell.band} data-heat-cell data-col={cell.date}
-                            className={css.cell} aria-label={`${copy.date} ${copy.detail}`}
-                            onMouseEnter={(event) => { showTip(cell, event.currentTarget) }}
-                            onMouseLeave={() => { setTooltip(null) }}
-                            onFocus={(event) => { showTip(cell, event.currentTarget) }}
-                            onBlur={() => { setTooltip(null) }} />
-                        )
-                      })}
-                      <span className={css.month}>{week.month === null ? '' : t('heatmap.month', { month: week.month })}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className={css.legend}>
-                {(['none', 'zero', 'low', 'mid', 'high'] as const).map(band => (
-                  <span key={band}><i data-band={band} />{t(`heatmap.legend.${band}`)}</span>
-                ))}
-              </div>
-              <div className={css.heatNav}>
-                <button type="button" className={css.heatBtn} aria-label={t('heatmap.earlier')} disabled={atStart} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, -7 * weekCount), today, origin)) }}><Chevron dir="left" /></button>
-                <button type="button" className={css.heatBtn} aria-label={t('heatmap.later')} disabled={atEnd} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, 7 * weekCount), today, origin)) }}><Chevron dir="right" /></button>
-              </div>
-            </section>
             {tooltip !== null && (
               <div className={css.tip} style={{ left: tooltip.x, top: tooltip.y }} role="tooltip">
                 <strong>{tooltip.date}</strong>
@@ -609,36 +573,91 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
             )}
           </>
         )}
+        {page === 'settings' && (
+          <div className={css.settings}>
+            <nav className={css.settingsNav} aria-label={t('nav.settings')}>
+              <Button icon={<IconDatabaseOutlineRegular />} className={css.settingsTab}
+                aria-current={settingsPage === 'model' ? 'page' : undefined} onClick={() => { setSettingsPage('model') }}>{t('settings.model')}</Button>
+              <Button icon={<IconChecklistOutlineRegular />} className={css.settingsTab}
+                aria-current={settingsPage === 'tags' ? 'page' : undefined} onClick={() => { setSettingsPage('tags') }}>{t('tags.settings')}</Button>
+            </nav>
+            <div hidden={settingsPage !== 'model'}><ModelSettings model={model} t={t} /></div>
+            {settingsPage === 'tags' && (
+              <section className={css.settingsContent}>
+                <div className={css.sectionHeader}>
+                  <h2>{t('tags.settings')}</h2>
+                  <Button variant="outline" size="sm" onClick={() => { setTagDraft({ name: '', description: '', color: 'blue' }) }}>{t('tags.add')}</Button>
+                </div>
+                {board.tags.length === 0 ? <p>{t('tags.empty')}</p> : (
+                  <ul className={css.settingsList}>
+                    {board.tags.map((tag) => {
+                      const paint = tagPaint(tag.color)
+                      return (
+                        <li key={tag.id} className={css.settingsCard}>
+                          <div className={css.sectionHeader}>
+                            <div className={css.tagDetails}>
+                              <h3><i aria-hidden="true" className={`${css.dot} ${paint.className}`} style={paint.style} />{tag.name}</h3>
+                              {tag.description && <p>{tag.description}</p>}
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => { setTagDraft(tag) }}>{t('menu.edit')}</Button>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </section>
+            )}
+          </div>
+        )}
       </div>
       {dialogTask !== undefined && (
         <Modal open title={t('edit.title')} closeLabel={t('edit.close')} onClose={() => { setEditing(null) }}
           footer={<>
-            <button type="button" className={css.danger} onClick={() => { actions.deleteTask(dialogTask.id); setEditing(null) }}>{t('edit.delete')}</button>
-            <button type="button" onClick={() => { setEditing(null) }}>{t('edit.close')}</button>
+            <Button className={css.danger} onClick={() => { actions.deleteTask(dialogTask.id); setEditing(null) }}>{t('edit.delete')}</Button>
+            <Button variant="primary" onClick={() => { setEditing(null) }}>{t('edit.close')}</Button>
           </>}>
-          <label>{t('edit.start')}<input type="date" value={dialogTask.start} onChange={(event) => { actions.updateTask(dialogTask.id, { start: event.target.value }) }} /></label>
-          <label>{t('edit.due')}<input type="date" value={dialogTask.due ?? ''} onChange={(event) => { actions.updateTask(dialogTask.id, { due: event.target.value === '' ? null : event.target.value }) }} /></label>
-          {dialogTask.due !== null && <button type="button" onClick={() => { actions.updateTask(dialogTask.id, { due: null }) }}>{t('edit.clearDue')}</button>}
-          <label>{t('edit.time')}<input type="time" value={dialogTask.time ?? ''} onChange={(event) => { actions.updateTask(dialogTask.id, { time: event.target.value }) }} /></label>
-          <label>{t('edit.recurrence')}
-            <select value={dialogTask.recurrence} onChange={(event) => { actions.updateTask(dialogTask.id, { recurrence: event.target.value as Task['recurrence'] }) }}>
-              <option value="none">{t('edit.recurrenceNone')}</option>
-              <option value="daily">{t('edit.recurrenceDaily')}</option>
-              <option value="weekday">{t('edit.recurrenceWeekday')}</option>
-            </select>
+          <label className={css.fieldLabel}>{t('edit.name')}
+            <Input key={dialogTask.id} defaultValue={dialogTask.title} onBlur={(event) => {
+              const title = event.target.value.trim() || dialogTask.title
+              actions.updateTask(dialogTask.id, { title })
+              event.target.value = title
+            }} />
           </label>
-          <div className={css.tagPick}>
-            {board.tags.length === 0 && <p>{t('edit.tagsEmpty')}</p>}
-            {board.tags.map((tag) => {
-              const paint = tagPaint(tag.color)
-              const on = dialogTask.tagIds.includes(tag.id)
-              return (
-                <button key={tag.id} type="button" className={`${on ? css.tagOn : css.tag} ${paint.className}`} style={paint.style} aria-pressed={on}
-                  onClick={() => { actions.toggleTaskTag(dialogTask.id, tag.id) }}>{tag.name}</button>
-              )
-            })}
+          <div className={css.dialogFields}>
+            <label className={css.fieldLabel}>{t('edit.start')}<Input type="date" value={dialogTask.start} onChange={(event) => { actions.updateTask(dialogTask.id, { start: event.target.value }) }} /></label>
+            <div className={css.dueField}>
+              <label className={css.fieldLabel}>{t('edit.due')}<Input type="date" value={dialogTask.due ?? ''} onChange={(event) => { actions.updateTask(dialogTask.id, { due: event.target.value || null }) }} /></label>
+              {dialogTask.due !== null && <Button size="sm" onClick={() => { actions.updateTask(dialogTask.id, { due: null }) }}>{t('edit.clearDue')}</Button>}
+            </div>
+            <label className={css.fieldLabel}>{t('edit.time')}<Input type="time" value={dialogTask.time ?? ''} onChange={(event) => { actions.updateTask(dialogTask.id, { time: event.target.value }) }} /></label>
+            <label className={css.fieldLabel}>{t('edit.recurrence')}
+              <select className={css.field} value={dialogTask.recurrence} onChange={(event) => {
+                const recurrence = event.target.value
+                if (recurrence === 'none' || recurrence === 'daily' || recurrence === 'weekday') actions.updateTask(dialogTask.id, { recurrence })
+              }}>
+                <option value="none">{t('edit.recurrenceNone')}</option>
+                <option value="daily">{t('edit.recurrenceDaily')}</option>
+                <option value="weekday">{t('edit.recurrenceWeekday')}</option>
+              </select>
+            </label>
           </div>
-          <div>
+          <section className={css.dialogSection}>
+            <h3>{t('tags.settings')}</h3>
+            <div className={css.tagPick}>
+              {board.tags.length === 0 && <p>{t('edit.tagsEmpty')}</p>}
+              {board.tags.map((tag) => {
+                const paint = tagPaint(tag.color)
+                const on = dialogTask.tagIds.includes(tag.id)
+                return (
+                  <button key={tag.id} type="button" className={`${on ? css.tagOn : css.tag} ${paint.className}`} style={paint.style} aria-pressed={on}
+                    onClick={() => { actions.toggleTaskTag(dialogTask.id, tag.id) }}>{tag.name}</button>
+                )
+              })}
+            </div>
+          </section>
+          <section className={css.dialogSection}>
+            <h3>{t('edit.notes')}</h3>
             {dialogTask.notes.length === 0 && <p>{t('edit.notesEmpty')}</p>}
             {dialogTask.notes.map((note) => {
               const long = note.text.split('\n').length > 3 || note.text.length > 140
@@ -646,7 +665,7 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
               return (
                 <article key={note.id} className={open ? css.noteOpen : css.note}>
                   {noteEdit?.noteId === note.id ? (
-                    <textarea value={noteEdit.draft} onChange={(event) => { setNoteEdit({ ...noteEdit, draft: event.target.value }) }}
+                    <textarea className={css.field} aria-label={t('edit.notes')} value={noteEdit.draft} onChange={(event) => { setNoteEdit({ ...noteEdit, draft: event.target.value }) }}
                       onKeyDown={(event) => {
                         if (event.key === 'Escape') setNoteEdit(null)
                         else submitEnter(event, () => { actions.updateNote(dialogTask.id, note.id, noteEdit.draft); setNoteEdit(null) })
@@ -654,12 +673,12 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                   ) : (
                     <button type="button" className={css.noteText} onClick={() => { setNoteEdit({ taskId: dialogTask.id, noteId: note.id, draft: note.text }) }}>{note.text}</button>
                   )}
-                  {long && <button type="button" onClick={() => { setExpanded(state => ({ ...state, [note.id]: !open })) }}>{t(open ? 'note.collapse' : 'note.expand')}</button>}
-                  <button type="button" className={css.danger} onClick={() => { actions.deleteNote(dialogTask.id, note.id) }}>{t('note.delete')}</button>
+                  {long && <Button size="sm" onClick={() => { setExpanded(state => ({ ...state, [note.id]: !open })) }}>{t(open ? 'note.collapse' : 'note.expand')}</Button>}
+                  <Button size="sm" className={css.danger} onClick={() => { actions.deleteNote(dialogTask.id, note.id) }}>{t('note.delete')}</Button>
                 </article>
               )
             })}
-            <textarea aria-label={t('note.placeholder')} placeholder={t('note.placeholder')} value={noteEdit?.noteId === null ? noteEdit.draft : ''}
+            <textarea className={css.field} aria-label={t('note.placeholder')} placeholder={t('note.placeholder')} value={noteEdit?.noteId === null ? noteEdit.draft : ''}
               onChange={(event) => { setNoteEdit({ taskId: dialogTask.id, noteId: null, draft: event.target.value }) }}
               onKeyDown={(event) => {
                 if (event.key === 'Escape') setNoteEdit(null)
@@ -670,72 +689,49 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
                   }
                 })
               }} />
-          </div>
+          </section>
         </Modal>
       )}
       {syncOpen && (
         <Modal open title={t('sync.title')} closeLabel={t('edit.close')} description={t('sync.body')} onClose={() => { setSyncOpen(false) }}
-          footer={<button type="button" disabled={syncReason !== null} onClick={() => { actions.syncDay(syncDate, board.viewedDate); setSyncOpen(false) }}>{t('sync.confirm')}</button>}>
-          <input type="date" aria-label={t('sync.title')} value={syncDate} onChange={(event) => { setSyncDate(event.target.value) }} />
-          <ul>
+          className={css.syncDialog ?? ''} contentClassName={css.syncContent ?? ''}
+          footer={<>
+            <Button variant="outline" onClick={() => { setSyncOpen(false) }}>{t('edit.cancel')}</Button>
+            <Button variant="primary" disabled={syncReason !== null} onClick={() => { actions.syncDay(syncDate, board.viewedDate); setSyncOpen(false) }}>{t('sync.confirm')}</Button>
+          </>}>
+          <label className={css.fieldLabel}>{t('sync.source')}<Input type="date" value={syncDate} onChange={(event) => { setSyncDate(event.target.value) }} /></label>
+          <ul className={css.settingsList}>
             {unfinishedDays(board, board.viewedDate, today).map(day => (
               <li key={day.date}>
-                <button type="button" className={syncDate === day.date ? `${css.syncRow} ${css.syncOn}` : css.syncRow} onClick={() => { setSyncDate(day.date) }}>
-                  {dayText(day.date, t)} {t('sync.count', { count: day.count })}
-                </button>
+                <Button variant="outline" className={css.syncRow} aria-pressed={syncDate === day.date} onClick={() => { setSyncDate(day.date) }}>
+                  <span>{dayText(day.date, t)}</span><span>{t('sync.count', { count: day.count })}</span>
+                </Button>
               </li>
             ))}
           </ul>
-          <p>{syncReason === null ? t('sync.preview', { source: dayText(syncDate, t), target: dayText(board.viewedDate, t) }) : t(syncReason)}</p>
+          <p className={css.muted} role="status">{syncReason === null ? t('sync.preview', { source: dayText(syncDate, t), target: dayText(board.viewedDate, t) }) : t(syncReason)}</p>
         </Modal>
       )}
       {clearOpen && (
         <Modal open title={t('header.clear')} closeLabel={t('edit.close')} description={t('clear.prompt')} onClose={() => { setClearOpen(false) }}
           footer={<button type="button" className={css.danger} onClick={() => { actions.clearDay(board.viewedDate); setClearOpen(false) }}>{t('clear.confirm')}</button>} />
       )}
-      {tagsOpen && (
-        <Modal open title={t('tags.settings')} closeLabel={t('edit.close')} onClose={() => { setTagsOpen(false) }}
-          footer={<button type="button" onClick={() => { actions.saveTag(tagDraft.name, tagDraft.color, tagDraft.description, tagDraft.id); setTagDraft({ name: '', description: '', color: 'blue' }) }}>{t('tags.add')}</button>}>
-          {board.tags.length === 0 && <p>{t('tags.empty')}</p>}
-          <ul>
-            {board.tags.map(tag => (
-              <li key={tag.id}>
-                <button type="button" onClick={() => { setTagDraft({ id: tag.id, name: tag.name, description: tag.description, color: tag.color }) }}>{tag.name}</button>
-                <button type="button" className={css.danger} onClick={() => { actions.deleteTag(tag.id) }}>{t('tags.delete')}</button>
-              </li>
-            ))}
-          </ul>
-          <label>{t('tags.name')}<input value={tagDraft.name} onChange={(event) => { setTagDraft({ ...tagDraft, name: event.target.value }) }} /></label>
-          <label>{t('tags.description')}<input value={tagDraft.description} onChange={(event) => { setTagDraft({ ...tagDraft, description: event.target.value }) }} /></label>
-          <div role="group" aria-label={t('tags.color')}>
-            {COLORS.map(color => (
-              <button key={color} type="button" className={css[`swatch-${color}`]} aria-pressed={tagDraft.color === color} aria-label={t(`tags.color.${color}`)}
-                onClick={() => { setTagDraft({ ...tagDraft, color }) }} />
-            ))}
-          </div>
-        </Modal>
-      )}
+      {tagDraft !== null && <EditTag initial={tagDraft} board={board} t={t} actions={actions} model={model}
+        onClose={() => { setTagDraft(null) }} onDelete={(id) => { setFilter(current => current.filter(value => value !== id)) }} />}
       {menu !== null && (
         <Menu open portal contextual anchor={null} anchorPoint={{ x: menu.x, y: menu.y }} submenuBackLabel={t('edit.close')} onClose={() => { setMenu(null) }}
           items={menu.subject.kind === 'group'
             ? [{ id: 'dissolve', label: t('menu.dissolve') }]
             : [
               { id: 'edit', label: t('menu.edit') },
-              { id: 'decompose', label: t('menu.decompose'), disabled: menuTask === undefined || board.viewedDate !== today || menuTask.completedDates.includes(board.viewedDate) },
-              { id: 'standardize', label: t('menu.standardize'), disabled: busy },
-              { id: 'classify', label: t('menu.classify'), disabled: busy },
+              { id: 'classify', label: t('menu.classify'), disabled: menuTask === undefined || busy },
             ]}
           onSelect={(id) => {
             const subject = menu.subject
             setMenu(null)
             if (subject.kind === 'group') actions.dissolveGroup(subject.id)
             else if (id === 'edit') setEditing(subject.id)
-            else if (id === 'decompose') {
-              const task = board.tasks.find(item => item.id === subject.id)
-              if (task !== undefined) decompose(task)
-            }
-            else if (id === 'standardize') void tidy(subject.id, 'standardize')
-            else void tidy(subject.id, 'classify')
+            else if (menuTask !== undefined) void classify(menuTask, board)
           }} />
       )}
       {focus !== null && (
@@ -760,52 +756,6 @@ function Ring({ rate, label }: { rate: number | null; label: string }) {
   )
 }
 
-function Title({ task, done }: { task: Task; done: boolean }) {
-  if (done) return <span className={css.doneTitle}>{task.title}</span>
-  return <span>{timeSpans(task.title).map((span, index) => <span key={`${index}-${span.text}`} className={span.time ? css.time : undefined}>{span.text}</span>)}</span>
-}
-
-function TaskRow(props: {
-  task: Task
-  board: Board
-  today: string
-  t: Translate
-  activity: ActivityState | undefined
-  decomposing: boolean
-  copied: boolean
-  collapsed: boolean
-  paired: string | undefined
-  child?: boolean
-  onPointerDown: (event: ReactPointerEvent) => void
-  onMenu: (event: React.MouseEvent) => void
-  onToggle: () => void
-  onFocus: () => void
-  onCopy: () => void
-}) {
-  const { task, board, today, t } = props
-  const done = task.completedDates.includes(board.viewedDate)
-  const tags = board.tags.filter(tag => task.tagIds.includes(tag.id))
-  return (
-    <div className={`${css.row} ${props.collapsed ? css.collapsed : ''} ${props.paired !== undefined ? css.pair : ''}`} data-row data-kind="task" data-id={task.id}
-      data-column={task.column} data-child={props.child ? 'true' : undefined} data-group={task.groupId ?? undefined}
-      onPointerDown={props.onPointerDown} onContextMenu={props.onMenu}>
-      <button type="button" role="checkbox" aria-checked={done} data-no-drag className={done ? css.boxOn : css.box} onClick={props.onToggle} />
-      {tags.map(tag => <i key={tag.id} className={`${css.dot} ${css[`swatch-${tag.color}`]}`} />)}
-      <Title task={task} done={done} />
-      {task.recurrence !== 'none' && <span className={css.pill}>{t(task.recurrence === 'daily' ? 'recurrence.daily' : 'recurrence.weekday')}</span>}
-      {focusAvailable(task, board.viewedDate, today) && <button type="button" className={css.iconBtn} data-no-drag aria-label={t('focus.dial')} onClick={props.onFocus}><ClockMark /></button>}
-      {noteLinesFirst(task) && <button type="button" className={css.iconBtn} data-no-drag aria-label={props.copied ? t('copy.copied') : t('copy.copy')} onClick={props.onCopy}>{props.copied ? <CheckMark /> : <CopyMark />}</button>}
-      {props.decomposing && <span className={css.spinner} aria-hidden />}
-      {props.activity !== undefined && <p className={props.activity.endsWith('Failed') ? css.fail : css.status}>{t(`status.${props.activity === 'classifyFailed' ? 'classifyFailed' : props.activity === 'standardizeFailed' ? 'standardizeFailed' : props.activity === 'classifying' ? 'classifying' : 'standardizing'}`)}</p>}
-      {props.paired !== undefined && <div className={css.pairBox}><span>{props.paired}</span><span>{task.title}</span></div>}
-    </div>
-  )
-}
-
-function noteLinesFirst(task: Task): boolean {
-  return task.notes[0]?.text.split('\n')[0]?.trim() === AI_NOTE
-}
-
 function GroupRow(props: {
   groupId: string
   title: string
@@ -817,7 +767,6 @@ function GroupRow(props: {
   board: Board
   today: string
   activityState: Record<string, ActivityState>
-  decomposing: string | null
   copied: string | null
   dragging: DragSubject | null
   preview: DropTarget | null
@@ -848,8 +797,8 @@ function GroupRow(props: {
         <strong onDoubleClick={props.onStartRename}>{props.title.trim() === '' ? props.t('group.untitled') : props.title}</strong>
       )}
       {props.tasks.map(task => (
-        <TaskRow key={task.id} task={task} board={props.board} today={props.today} t={props.t} child
-          activity={props.activityState[task.id]} decomposing={props.decomposing === task.id} copied={props.copied === task.id}
+        <TaskRow key={task.id} task={task} tags={props.board.tags} date={props.board.viewedDate} today={props.today} t={props.t} child
+          activity={props.activityState[task.id]} copied={props.copied === task.id}
           collapsed={props.dragging?.id === task.id && (props.preview?.kind === 'pair' || props.preview?.kind === 'join')}
           paired={undefined}
           onPointerDown={(event) => { event.stopPropagation(); props.onPointerDown(event, { kind: 'task', id: task.id }) }}
@@ -870,14 +819,6 @@ function Insight({ number, module, caption, body }: { number: string; module: st
       <p className={css.caption}>{caption === '' ? module : `${module} · ${caption}`}</p>
       <p>{body}</p>
     </article>
-  )
-}
-
-function Glyph({ children }: { children: ReactNode }) {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      {children}
-    </svg>
   )
 }
 
@@ -904,28 +845,6 @@ function TrashMark() {
       <path d="M8 7l1 12h6l1-12" />
     </Glyph>
   )
-}
-
-function ClockMark() {
-  return (
-    <Glyph>
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 8v4l3 2" />
-    </Glyph>
-  )
-}
-
-function CopyMark() {
-  return (
-    <Glyph>
-      <rect x="8" y="8" width="11" height="11" rx="2" />
-      <path d="M5 15V5h10" />
-    </Glyph>
-  )
-}
-
-function CheckMark() {
-  return <Glyph><path d="M5 12.5 9.5 17 19 7" /></Glyph>
 }
 
 function PinMark({ filled }: { filled: boolean }) {

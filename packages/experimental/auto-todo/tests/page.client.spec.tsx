@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 /** The tasks page commits edits, drag, focus, stats, and inspiration through the board store. */
 
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { useEffect, useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AutoTodoPage } from '../src/client/AutoTodoPage.tsx'
+import { TodayMust } from '../src/client/TodayMust.tsx'
 import { createBoardStore } from '../src/client/board-store.ts'
 import { zh, type AutoTodoKey } from '../src/client/locales.ts'
+import type { ModelActions } from '../src/client/model-actions.ts'
 
 const NOW = new Date(2026, 10, 26, 15, 0, 0).getTime()
 
@@ -18,20 +20,35 @@ function text(key: AutoTodoKey, params?: Record<string, string | number>): strin
   return value
 }
 
-function mount(options?: { now?: () => number; broken?: boolean }) {
+function mount(options?: { now?: () => number; broken?: boolean; sidebar?: boolean }) {
   localStorage.clear()
   const clock = options?.now ?? (() => NOW)
   const instance = createBoardStore().create('page-spec')
+  const settings = {
+    mode: 'dsh' as const, endpoint: 'https://api.typesafe.ai/v1', model: 'jev-latest',
+    keyConfigured: false, dshProvider: 'deepseek', dshModel: 'fixture',
+  }
+  const model = {
+    settings: vi.fn<ModelActions['settings']>().mockResolvedValue(settings),
+    save: vi.fn<ModelActions['save']>().mockResolvedValue(settings),
+    models: vi.fn<ModelActions['models']>().mockResolvedValue(['jev-latest']),
+    classify: vi.fn<ModelActions['classify']>().mockRejectedValue(new Error('model unavailable')),
+    describeTag: vi.fn<ModelActions['describeTag']>().mockResolvedValue('生成的说明'),
+  }
   if (options?.broken) instance.actions.reset = instance.actions.reset
   function View() {
     const [, bump] = useState(0)
     useEffect(() => instance.subscribe(() => { bump(value => value + 1) }), [])
     const stored = options?.broken ? { version: 0 } : instance.getSnapshot()
-    const useStore = (selector: (state: typeof stored) => unknown) => selector(stored)
-    return <AutoTodoPage useStore={useStore as never} actions={instance.actions} now={clock} t={text as never} />
+    const useBoard = (() => stored) as never
+    const t = text as never
+    return <>
+      <AutoTodoPage useBoard={useBoard} actions={instance.actions} model={model} now={clock} t={t} />
+      {options?.sidebar && <TodayMust useBoard={useBoard} actions={instance.actions} now={clock} t={t} />}
+    </>
   }
   const view = render(<View />)
-  return { ...view, instance }
+  return { ...view, instance, model }
 }
 
 function rect(left: number, top: number, width: number, height: number): DOMRect {
@@ -60,6 +77,29 @@ afterEach(() => {
 })
 
 describe('auto todo page', () => {
+  it('syncs new and checked must-do tasks between the board and sidebar', () => {
+    const { instance } = mount({ sidebar: true })
+    const sidebar = within(screen.getByRole('region', { name: text('sidebar.today') }))
+    const mainInput = screen.getAllByRole('textbox', { name: text('add.must') })[0]!
+    const sidebarInput = sidebar.getByRole('textbox', { name: text('add.must') })
+    fireEvent.change(mainInput, { target: { value: '任务板添加' } })
+    fireEvent.keyDown(mainInput, { key: 'Enter' })
+    fireEvent.change(sidebarInput, { target: { value: '右侧栏添加' } })
+    fireEvent.keyDown(sidebarInput, { key: 'Enter' })
+    expect(sidebarInput).toHaveProperty('value', '')
+    const sidebarCheck = sidebar.getByRole('checkbox', { name: '任务板添加' })
+    fireEvent.click(sidebarCheck)
+    expect(taskRow('任务板添加').querySelector('[role="checkbox"]')?.getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(taskRow('右侧栏添加').querySelector('[role="checkbox"]')!)
+    expect(sidebar.getByRole('checkbox', { name: '右侧栏添加' }).getAttribute('aria-checked')).toBe('true')
+    change(() => {
+      instance.actions.addTask('optional', '选做任务', '2026-11-26', [], NOW)
+      instance.actions.addTask('must', '昨天任务', '2026-11-25', [], NOW)
+      instance.actions.setViewedDate('2026-11-25')
+    })
+    expect(sidebar.getAllByRole('checkbox').map(row => row.getAttribute('aria-label'))).toEqual(['任务板添加', '右侧栏添加'])
+  })
+
   it('resets a board the page cannot read', () => {
     const reset = vi.fn()
     const view = mount({ broken: true })
@@ -104,7 +144,7 @@ describe('auto todo page', () => {
       instance.actions.addTask('optional', '今天的', '2026-11-26', [], NOW)
     })
     fireEvent.click(screen.getByRole('button', { name: text('header.sync') }))
-    expect(screen.getByText(text('sync.sameDay'))).toBeTruthy()
+    expect(screen.getByText(text('sync.pick'))).toBeTruthy()
     const syncDialog = screen.getByRole('dialog', { name: text('sync.title') })
     fireEvent.change(syncDialog.querySelector('input[type="date"]')!, { target: { value: '2026-11-25' } })
     fireEvent.click(screen.getAllByRole('button', { name: text('sync.confirm') }).at(-1)!)
@@ -120,13 +160,14 @@ describe('auto todo page', () => {
   it('pins and edits tags, then filters the column', async () => {
     vi.useFakeTimers()
     const { instance } = mount()
+    fireEvent.click(screen.getByRole('button', { name: text('nav.settings') }))
     fireEvent.click(screen.getByRole('button', { name: text('tags.settings') }))
     fireEvent.click(screen.getByRole('button', { name: text('tags.add') }))
     fireEvent.change(screen.getByLabelText(text('tags.name')), { target: { value: '工作' } })
     fireEvent.change(screen.getByLabelText(text('tags.description')), { target: { value: '白天' } })
     fireEvent.click(screen.getByRole('button', { name: text('tags.color.green') }))
-    fireEvent.click(screen.getByRole('button', { name: text('tags.add') }))
-    fireEvent.click(screen.getByRole('button', { name: text('edit.close') }))
+    fireEvent.click(screen.getByRole('button', { name: text('settings.save') }))
+    fireEvent.click(screen.getByRole('button', { name: text('nav.tasks') }))
     const tagId = instance.getSnapshot().tags[0]!.id
     change(() => {
       instance.actions.addTask('must', '带标签', '2026-11-26', [tagId], NOW)
@@ -139,36 +180,45 @@ describe('auto todo page', () => {
     expect(taskRow('带标签')).toBeTruthy()
     expect(document.body.textContent).not.toContain('裸的')
     fireEvent.doubleClick(screen.getByText('工作'))
+    expect(screen.getByRole('dialog', { name: text('tags.edit') })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: text('tags.delete') }))
     expect(instance.getSnapshot().tags).toEqual([])
   })
 
-  it('opens the menu, standardizes, classifies, and decomposes into the composer', async () => {
-    vi.useFakeTimers()
-    mount()
+  it('classifies into existing tags on demand and keeps the original tags and column', async () => {
+    const { instance, model } = mount()
+    model.classify.mockResolvedValueOnce([0, 2])
     const input = screen.getByLabelText(text('add.optional'))
     fireEvent.change(input, { target: { value: '1. 选做 写，核对' } })
     fireEvent.keyDown(input, { key: 'Enter' })
-    await act(async () => { await vi.advanceTimersByTimeAsync(40) })
-    expect(taskRow('选做 写，核对')).toBeTruthy()
-    fireEvent.contextMenu(taskRow('选做 写，核对'), { clientX: 12, clientY: 20 })
-    fireEvent.click(screen.getByRole('menuitem', { name: text('menu.decompose') }))
-    await act(async () => { await vi.advanceTimersByTimeAsync(280) })
-    const composer = screen.getByLabelText(text('composer.placeholder'))
-    expect((composer as HTMLTextAreaElement).value).toContain('核对')
-    fireEvent.keyDown(composer, { key: 'Enter' })
-    expect(taskRow('核对')).toBeTruthy()
+    expect(model.classify).not.toHaveBeenCalled()
+    const id = instance.getSnapshot().tasks[0]!.id
+    change(() => {
+      instance.actions.saveTag('工作', 'blue', '工作相关')
+      instance.actions.toggleTaskTag(id, instance.getSnapshot().tags[0]!.id)
+      instance.actions.saveTag('收尾', 'red', '需按期交付')
+      instance.actions.saveTag('采购', 'green', '')
+      instance.actions.saveTag('文档', 'white', '写作与核对')
+      instance.actions.addNote(id, '今天截止')
+    })
     fireEvent.contextMenu(taskRow('选做 写'), { clientX: 4, clientY: 4 })
-    fireEvent.click(screen.getByRole('menuitem', { name: text('menu.standardize') }))
-    await act(async () => { await vi.advanceTimersByTimeAsync(40) })
-    fireEvent.contextMenu(taskRow('选做 写'), { clientX: 4, clientY: 4 })
+    expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual([text('menu.edit'), text('menu.classify')])
+    expect(screen.queryByLabelText(text('composer.placeholder'))).toBeNull()
     fireEvent.click(screen.getByRole('menuitem', { name: text('menu.classify') }))
-    await act(async () => { await vi.advanceTimersByTimeAsync(40) })
-    const blank = screen.getByLabelText(text('add.must'))
-    fireEvent.change(blank, { target: { value: '1.' } })
-    fireEvent.keyDown(blank, { key: 'Enter' })
-    await act(async () => { await vi.advanceTimersByTimeAsync(40) })
-    expect(screen.getByText(text('status.standardizeFailed'))).toBeTruthy()
+    await act(async () => {})
+    expect(model.classify).toHaveBeenCalledWith({
+      title: '1. 选做 写，核对',
+      notes: ['今天截止'],
+      assignedTags: [{ name: '工作', description: '工作相关' }],
+      candidates: [
+        { name: '收尾', description: '需按期交付' },
+        { name: '采购', description: '' },
+        { name: '文档', description: '写作与核对' },
+      ],
+    }, expect.any(AbortSignal))
+    const saved = instance.getSnapshot()
+    expect(saved.tasks[0]?.tagIds).toEqual([saved.tags[0]!.id, saved.tags[1]!.id, saved.tags[3]!.id])
+    expect(saved.tasks[0]?.column).toBe('optional')
     fireEvent.contextMenu(taskRow('选做 写'), { clientX: 4, clientY: 4 })
     fireEvent.click(screen.getByRole('menuitem', { name: text('menu.edit') }))
     expect(screen.getByRole('dialog', { name: text('edit.title') })).toBeTruthy()
@@ -441,23 +491,26 @@ describe('auto todo page', () => {
     fireEvent.pointerUp(window, { clientX: 40, clientY: 300 })
     fireEvent.doubleClick(screen.getByText(text('group.untitled')))
     fireEvent.keyDown(screen.getByLabelText(text('group.untitled')), { key: 'Escape' })
-    const composer = screen.getByLabelText(text('composer.placeholder'))
-    fireEvent.change(composer, { target: { value: '一行\n  \n两行' } })
-    fireEvent.keyDown(composer, { key: 'Enter', shiftKey: true })
-    fireEvent.keyDown(composer, { key: 'Enter' })
+    change(() => {
+      instance.actions.addTask('must', '一行', '2026-11-26', [], NOW)
+      instance.actions.addTask('must', '两行', '2026-11-26', [], NOW)
+    })
     expect(taskRow('一行')).toBeTruthy()
     expect(taskRow('两行')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: text('header.clear') }))
     fireEvent.click(screen.getByRole('button', { name: text('edit.close') }))
     expect(screen.queryByRole('dialog')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: text('nav.settings') }))
     fireEvent.click(screen.getByRole('button', { name: text('tags.settings') }))
     expect(screen.getByText(text('tags.empty'))).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: text('edit.close') }))
+    fireEvent.click(screen.getByRole('button', { name: text('nav.tasks') }))
     const must = screen.getByLabelText(text('add.must'))
     fireEvent.change(must, { target: { value: '开会' } })
     fireEvent.keyDown(must, { key: 'Enter' })
+    fireEvent.contextMenu(taskRow('开会'), { clientX: 4, clientY: 4 })
+    fireEvent.click(screen.getByRole('menuitem', { name: text('menu.classify') }))
     await act(async () => { await vi.advanceTimersByTimeAsync(40) })
-    expect(screen.getByText(text('status.classifyFailed'))).toBeTruthy()
+    expect(screen.getByText(text('status.classifyNoTags'))).toBeTruthy()
     fireEvent.keyDown(must, { key: 'Enter' })
     fireEvent.contextMenu(taskRow('开会'), { clientX: 4, clientY: 4 })
     fireEvent.keyDown(document, { key: 'Escape' })
@@ -473,6 +526,9 @@ describe('auto todo page', () => {
       }
       const tags = instance.getSnapshot().tags
       instance.actions.toggleTaskTag(instance.getSnapshot().tasks[0]!.id, tags[0]!.id)
+      const meeting = instance.getSnapshot().tasks.find(task => task.title === '开会')!
+      const life = tags.find(tag => tag.name === '生活')!
+      instance.actions.toggleTaskTag(meeting.id, life.id)
       const stalled = instance.getSnapshot().tasks.find(task => task.title === '两行')!
       instance.actions.toggleTaskTag(stalled.id, tags[1]!.id)
       instance.actions.updateTask(instance.getSnapshot().tasks[0]!.id, { recurrence: 'daily' })
@@ -491,15 +547,15 @@ describe('auto todo page', () => {
       instance.actions.setCompleted(half.id, '2026-11-20', true)
       instance.actions.moveToInspiration(instance.getSnapshot().tasks.find(task => task.title === '一行')!.id, 0)
     })
+    expect(taskRow('开会').querySelector('i')?.getAttribute('style') ?? '').toMatch(/F79410|247,\s*148,\s*16/i)
     fireEvent.click(screen.getByText('工作'))
     await act(async () => { await vi.advanceTimersByTimeAsync(220) })
     fireEvent.click(screen.getByText('工作'))
     await act(async () => { await vi.advanceTimersByTimeAsync(220) })
     fireEvent.doubleClick(screen.getByText('工作'))
     await act(async () => { await vi.advanceTimersByTimeAsync(220) })
-    document.querySelector('span[title="说明"]')!.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
-    fireEvent.click(screen.getByRole('button', { name: '工作' }))
-    const dialog = screen.getByRole('dialog')
+    const dialog = screen.getByRole('dialog', { name: text('tags.edit') })
+    expect(screen.getByLabelText(text('tags.description'))).toHaveProperty('value', '说明')
     fireEvent.click(dialog.querySelector('button[aria-label="关闭"]')!)
     fireEvent.pointerDown(taskRow('乙'), { button: 0, clientX: 4, clientY: 4 })
     fireEvent.pointerUp(window, { clientX: 4, clientY: 4 })
@@ -518,8 +574,6 @@ describe('auto todo page', () => {
       instance.actions.setCompleted(plain.id, '2026-11-26', true)
       instance.actions.addTask('must', '1.', '2026-11-26', [], NOW)
     })
-    fireEvent.contextMenu(taskRow('开会'), { clientX: 4, clientY: 4 })
-    fireEvent.click(screen.getByRole('menuitem', { name: text('menu.decompose') }))
     fireEvent.contextMenu(taskRow('1.'), { clientX: 4, clientY: 4 })
     fireEvent.click(screen.getByRole('menuitem', { name: text('menu.classify') }))
     await act(async () => { await vi.advanceTimersByTimeAsync(40) })

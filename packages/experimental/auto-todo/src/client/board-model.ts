@@ -651,67 +651,19 @@ function placeTop(board: Board, task: Task, column: Column, index: number): void
 }
 
 /**
- * Collapse whitespace and a leading list marker.
- * @param title - raw title.
- * @returns the tidied title, or null when nothing remains.
- */
-export function standardizedTitle(title: string): string | null {
-  const next = title.replace(/^\s*\d+\s*[.、)]\s*/, '').replace(/\s+/g, ' ').trim()
-  return next === '' ? null : next
-}
-
-/**
- * Apply title tidying.
+ * Append existing tags to a task, preserving its existing assignments.
  * @param board - board draft.
  * @param id - task id.
- * @returns true when the title changed or was already tidy, false when it would become empty.
+ * @param tagIds - tags to add. Deleted or already assigned ids have no effect.
+ * @returns nothing.
  */
-export function applyStandardize(board: Board, id: string): boolean {
+export function addTaskTags(board: Board, id: string, tagIds: readonly string[]): void {
   const task = board.tasks.find(item => item.id === id)
-  if (task === undefined) return false
-  const next = standardizedTitle(task.title)
-  if (next === null) return false
-  task.title = next
-  return true
-}
-
-/**
- * Choose a column from title keywords.
- * @param title - task title.
- * @returns the column, or null when the title names neither.
- */
-export function classifiedColumn(title: string): Column | null {
-  const optionalAt = title.search(/选做|可选|也许|optional/i)
-  const mustAt = title.search(/必做|必须|重要|\bmust\b/i)
-  if (optionalAt < 0 && mustAt < 0) return null
-  if (optionalAt < 0) return 'must'
-  if (mustAt < 0) return 'optional'
-  return optionalAt < mustAt ? 'optional' : 'must'
-}
-
-/**
- * Move a task to the column its title names.
- * @param board - board draft.
- * @param id - task id.
- * @returns true when a column was recognized.
- */
-export function applyClassify(board: Board, id: string): boolean {
-  const task = board.tasks.find(item => item.id === id)
-  if (task === undefined) return false
-  const column = classifiedColumn(task.title)
-  if (column === null) return false
-  if (task.column !== column) placeTop(board, task, column, 10_000)
-  return true
-}
-
-/**
- * Split a title into decompose lines.
- * @param title - task title.
- * @returns two or more parts, or the original title when it does not split.
- */
-export function decomposeLines(title: string): string[] {
-  const parts = title.split(/[，,、]|(?<=\S)和(?=\S)/).map(part => part.trim()).filter(part => part !== '')
-  return parts.length > 1 ? parts : [title.trim() === '' ? title : title.trim()]
+  if (task === undefined) return
+  const selected = new Set(tagIds)
+  for (const tag of board.tags) {
+    if (selected.has(tag.id) && !task.tagIds.includes(tag.id)) task.tagIds.push(tag.id)
+  }
 }
 
 /**
