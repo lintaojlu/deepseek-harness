@@ -24,7 +24,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-启用 [Nil 插件组合包](../nil-plugin-bundle/README.zh.md)。从侧边栏打开自动待办。在任一列添加任务。点一行即可编辑。齿轮打开标签。统计在页面自己的侧栏里。
+启用 [Nil 插件组合包](../nil-plugin-bundle/README.zh.md)。从侧边栏打开自动待办。在任一列添加任务。点一行即可编辑。齿轮打开标签。任务和统计在页面顶栏切换。
 
 ### 最小配置
 

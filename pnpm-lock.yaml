@@ -10822,9 +10822,6 @@ importers:
       '@deepseek-ai/dsh-client-ui-whiteboard':
         specifier: workspace:*
         version: link:../client-ui-whiteboard
-      '@deepseek-ai/dsh-rollback':
-        specifier: workspace:*
-        version: link:../../compaction/rollback
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:~

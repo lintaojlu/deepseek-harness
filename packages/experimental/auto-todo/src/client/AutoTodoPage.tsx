@@ -1,5 +1,5 @@
 /**
- * Tasks panel: a date board, tag filter, focus timer, stats, and inspiration.
+ * Tasks panel: a date board, tag filter, focus timer, and stats.
  * Edits commit immediately. The page keeps only viewing state of its own.
  */
 
@@ -14,7 +14,7 @@ import {
   type Board, type Column, type DragSubject, type DropTarget, type TagColor, type Task,
 } from './board-model.ts'
 import {
-  activity, clampHeatEnd, columnRate, heatOrigin, heatWeeks, ideaInsight, percentOf, rateBetween, tagInsight,
+  activity, clampHeatEnd, columnRate, heatOrigin, heatWeeks, percentOf, rateBetween, tagInsight,
   type HeatCell,
 } from './board-stats.ts'
 import type { createBoardStore } from './board-store.ts'
@@ -389,24 +389,21 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageProps) {
     month: rateBetween(board, addDays(today, -29), today),
     activity: activity(board, today),
     tags: tagInsight(board, today),
-    ideas: ideaInsight(board, now()),
   } : null
 
   return (
     <div ref={pageRef} className={`${css.page} ${narrow ? css.narrow : ''} ${dragging ? css.grabbing : ''} ${focus ? css.focusing : ''}`}>
-      <nav className={css.rail} aria-label={t('panel')}>
-        {(['tasks', 'stats'] as const).map(id => (
-          <button key={id} type="button" className={page === id ? css.railOn : css.railButton} aria-current={page === id ? 'page' : undefined}
-            onClick={() => { setPage(id); setTooltip(null) }}>
-            <RailIcon id={id} />
-            <span>{t(id === 'stats' ? 'nav.stats' : 'nav.tasks')}</span>
-          </button>
-        ))}
-      </nav>
-      {page === 'tasks' && (
-        <div className={css.main}>
-          <header className={css.header}>
-            <h1>{t('nav.tasks')}</h1>
+      <div className={css.main}>
+        <header className={css.header}>
+          <nav className={css.switcher} aria-label={t('panel')}>
+            {(['tasks', 'stats'] as const).map(id => (
+              <button key={id} type="button" className={page === id ? css.switchOn : css.switchBtn} aria-current={page === id ? 'page' : undefined}
+                onClick={() => { setPage(id); setTooltip(null) }}>
+                {t(id === 'stats' ? 'nav.stats' : 'nav.tasks')}
+              </button>
+            ))}
+          </nav>
+          {page === 'tasks' && (
             <div className={css.dateTools}>
               <button type="button" className={css.iconBtn} aria-label={t('header.previous')} onClick={() => { actions.setViewedDate(addDays(board.viewedDate, -1)) }}><Chevron dir="left" /></button>
               <span className={css.date}>{dayText(board.viewedDate, t)}</span>
@@ -415,204 +412,205 @@ export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageProps) {
               <button type="button" className={css.iconBtn} aria-label={t('header.sync')} onClick={() => { setSyncDate(''); setSyncOpen(true) }}><SyncMark /></button>
               <button type="button" className={`${css.iconBtn} ${css.iconDanger}`} aria-label={t('header.clear')} onClick={() => { setClearOpen(true) }}><TrashMark /></button>
             </div>
-          </header>
-          <section className={css.board} style={{ height: board.listHeight }}>
-            {(['must', 'optional'] as const).map((column) => {
-              const rows = rowsFor(board, column, board.viewedDate, filter)
-              const notice = columnNotice(board, column, board.viewedDate, filter)
-              const rate = columnRate(board, board.viewedDate, column)
-              return (
-                <div key={column} className={css.column}>
-                  <div className={css.columnHead}>
-                    <span>{t(column === 'must' ? 'column.must' : 'column.optional')}</span>
-                    {column === 'must' && <Ring rate={rate} label={rate === null ? t('column.progressEmpty') : t('column.progress', { percent: percentOf(rate) })} />}
-                  </div>
-                  <input aria-label={t(column === 'must' ? 'add.must' : 'add.optional')} placeholder={t(column === 'must' ? 'add.must' : 'add.optional')}
-                    value={drafts[column]} onChange={(event) => { setDrafts(state => ({ ...state, [column]: event.target.value })) }}
-                    onKeyDown={(event) => { submitEnter(event, () => { add(column, drafts[column]) }) }} />
-                  <div className={css.list} data-column-body data-column={column}>
-                    {notice !== null && <p className={css.empty}>{t(notice === 'empty' ? 'empty.column' : 'empty.filtered')}</p>}
-                    {rows.map((row, index) => {
-                      const line = preview?.kind === 'insert' && preview.column === column && preview.index === index
-                        ? <div key={`line-${column}-${index}`} className={css.insert} /> : null
-                      if (row.kind === 'task') {
-                        return [line, <TaskRow key={row.task.id} task={row.task} board={board} today={today} t={t}
-                          activity={activityState[row.task.id]} decomposing={decomposing === row.task.id}
-                          copied={copied === row.task.id} collapsed={dragging?.id === row.task.id && (preview?.kind === 'pair' || preview?.kind === 'join')}
-                          paired={preview?.kind === 'pair' && preview.taskId === row.task.id ? board.tasks.find(item => item.id === dragging?.id)?.title : undefined}
-                          onPointerDown={(event) => { onRowPointerDown(event, { kind: 'task', id: row.task.id }) }}
-                          onMenu={(event) => { openMenu(event, { kind: 'task', id: row.task.id }) }}
-                          onToggle={() => {
-                            actions.setCompleted(
-                              row.task.id,
-                              board.viewedDate,
-                              !row.task.completedDates.includes(board.viewedDate),
-                            )
+          )}
+        </header>
+        {page === 'tasks' && (
+          <>
+            <section className={css.board} style={{ height: board.listHeight }}>
+              {(['must', 'optional'] as const).map((column) => {
+                const rows = rowsFor(board, column, board.viewedDate, filter)
+                const notice = columnNotice(board, column, board.viewedDate, filter)
+                const rate = columnRate(board, board.viewedDate, column)
+                return (
+                  <div key={column} className={css.column}>
+                    <div className={css.columnHead}>
+                      <span>{t(column === 'must' ? 'column.must' : 'column.optional')}</span>
+                      {column === 'must' && <Ring rate={rate} label={rate === null ? t('column.progressEmpty') : t('column.progress', { percent: percentOf(rate) })} />}
+                    </div>
+                    <input aria-label={t(column === 'must' ? 'add.must' : 'add.optional')} placeholder={t(column === 'must' ? 'add.must' : 'add.optional')}
+                      value={drafts[column]} onChange={(event) => { setDrafts(state => ({ ...state, [column]: event.target.value })) }}
+                      onKeyDown={(event) => { submitEnter(event, () => { add(column, drafts[column]) }) }} />
+                    <div className={css.list} data-column-body data-column={column}>
+                      {notice !== null && <p className={css.empty}>{t(notice === 'empty' ? 'empty.column' : 'empty.filtered')}</p>}
+                      {rows.map((row, index) => {
+                        const line = preview?.kind === 'insert' && preview.column === column && preview.index === index
+                          ? <div key={`line-${column}-${index}`} className={css.insert} /> : null
+                        if (row.kind === 'task') {
+                          return [line, <TaskRow key={row.task.id} task={row.task} board={board} today={today} t={t}
+                            activity={activityState[row.task.id]} decomposing={decomposing === row.task.id}
+                            copied={copied === row.task.id} collapsed={dragging?.id === row.task.id && (preview?.kind === 'pair' || preview?.kind === 'join')}
+                            paired={preview?.kind === 'pair' && preview.taskId === row.task.id ? board.tasks.find(item => item.id === dragging?.id)?.title : undefined}
+                            onPointerDown={(event) => { onRowPointerDown(event, { kind: 'task', id: row.task.id }) }}
+                            onMenu={(event) => { openMenu(event, { kind: 'task', id: row.task.id }) }}
+                            onToggle={() => {
+                              actions.setCompleted(
+                                row.task.id,
+                                board.viewedDate,
+                                !row.task.completedDates.includes(board.viewedDate),
+                              )
+                            }}
+                            onFocus={() => { setFocus({ taskId: row.task.id, phase: 'pick', minutes: 25, remaining: 25 * 60_000, deadline: 0 }) }}
+                            onCopy={() => { void copyTask(row.task) }} />]
+                        }
+                        return [line, <GroupRow
+                          key={row.group.id}
+                          groupId={row.group.id}
+                          title={row.group.title}
+                          tasks={row.tasks}
+                          column={column}
+                          renaming={renaming === row.group.id} draft={renameDraft} t={t} board={board} today={today}
+                          activityState={activityState} decomposing={decomposing} copied={copied} dragging={dragging} preview={preview}
+                          onRenameDraft={setRenameDraft}
+                          onStartRename={() => { setRenaming(row.group.id); setRenameDraft(row.group.title) }}
+                          onCommitRename={() => { actions.renameGroup(row.group.id, renameDraft); setRenaming(null) }}
+                          onCancelRename={() => { setRenaming(null) }}
+                          onPointerDown={onRowPointerDown} onMenu={openMenu}
+                          onToggle={(id) => {
+                            const task = row.tasks.find(item => item.id === id)
+                            if (task === undefined) return
+                            actions.setCompleted(id, board.viewedDate, !task.completedDates.includes(board.viewedDate))
                           }}
-                          onFocus={() => { setFocus({ taskId: row.task.id, phase: 'pick', minutes: 25, remaining: 25 * 60_000, deadline: 0 }) }}
-                          onCopy={() => { void copyTask(row.task) }} />]
-                      }
-                      return [line, <GroupRow
-                        key={row.group.id}
-                        groupId={row.group.id}
-                        title={row.group.title}
-                        tasks={row.tasks}
-                        column={column}
-                        renaming={renaming === row.group.id} draft={renameDraft} t={t} board={board} today={today}
-                        activityState={activityState} decomposing={decomposing} copied={copied} dragging={dragging} preview={preview}
-                        onRenameDraft={setRenameDraft}
-                        onStartRename={() => { setRenaming(row.group.id); setRenameDraft(row.group.title) }}
-                        onCommitRename={() => { actions.renameGroup(row.group.id, renameDraft); setRenaming(null) }}
-                        onCancelRename={() => { setRenaming(null) }}
-                        onPointerDown={onRowPointerDown} onMenu={openMenu}
-                        onToggle={(id) => {
-                          const task = row.tasks.find(item => item.id === id)
-                          if (task === undefined) return
-                          actions.setCompleted(id, board.viewedDate, !task.completedDates.includes(board.viewedDate))
-                        }}
-                        onFocus={(id) => { setFocus({ taskId: id, phase: 'pick', minutes: 25, remaining: 25 * 60_000, deadline: 0 }) }}
-                        onCopy={(id) => {
-                          const task = board.tasks.find(item => item.id === id)
-                          if (task !== undefined) void copyTask(task)
-                        }} />]
-                    })}
-                    {preview?.kind === 'insert' && preview.column === column && preview.index === rows.length && <div className={css.insert} />}
+                          onFocus={(id) => { setFocus({ taskId: id, phase: 'pick', minutes: 25, remaining: 25 * 60_000, deadline: 0 }) }}
+                          onCopy={(id) => {
+                            const task = board.tasks.find(item => item.id === id)
+                            if (task !== undefined) void copyTask(task)
+                          }} />]
+                      })}
+                      {preview?.kind === 'insert' && preview.column === column && preview.index === rows.length && <div className={css.insert} />}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-            <div className={css.resize} data-resize role="separator" aria-orientation="horizontal" aria-label={t('nav.tasks')}
-              onPointerDown={(event) => {
-                const startY = event.clientY
-                const start = board.listHeight
-                const move = (ev: PointerEvent): void => { actions.setListHeight(start + ev.clientY - startY, window.innerHeight || 800) }
-                const up = (): void => {
-                  window.removeEventListener('pointermove', move)
-                  window.removeEventListener('pointerup', up)
-                }
-                window.addEventListener('pointermove', move)
-                window.addEventListener('pointerup', up)
-              }} />
-          </section>
-          <div className={css.tags}>
-            {barTags(board, board.viewedDate).map((tag) => {
-              const paint = tagPaint(tag.color)
-              return (
-                <span key={tag.id} className={`${css.tag} ${paint.className} ${filter.includes(tag.id) ? css.tagOn : ''} ${tag.pinned ? css.tagPinned : ''}`}
-                  style={paint.style}
-                  title={tag.description || undefined}
-                  onClick={() => {
-                    window.clearTimeout(filterTimer.current as number)
-                    filterTimer.current = window.setTimeout(() => {
-                      setFilter(current => current.includes(tag.id) ? current.filter(id => id !== tag.id) : [...current, tag.id])
-                    }, 220)
-                  }}
-                  onDoubleClick={() => {
-                    window.clearTimeout(filterTimer.current as number)
-                    setTagDraft({ id: tag.id, name: tag.name, description: tag.description, color: tag.color })
-                    setTagsOpen(true)
-                  }}>
-                  {tag.name}
-                  <button
-                    type="button"
-                    className={tag.pinned ? `${css.pin} ${css.pinOn}` : css.pin}
-                    data-no-drag
-                    aria-label={tag.pinned ? t('pin.unpin') : t('pin.pin')}
-                    aria-pressed={tag.pinned}
-                    onClick={(event) => { event.stopPropagation(); actions.togglePin(tag.id) }}
-                  >
-                    <PinMark filled={tag.pinned} />
-                  </button>
-                </span>
-              )
-            })}
-            <button type="button" className={css.gear} aria-label={t('tags.settings')} onClick={() => { setTagDraft({ name: '', description: '', color: 'blue' }); setTagsOpen(true) }}>{'⚙'}</button>
-          </div>
-          <textarea className={css.composer} aria-label={t('composer.placeholder')} placeholder={t('composer.placeholder')} value={composer}
-            onChange={(event) => { setComposer(event.target.value) }}
-            onKeyDown={(event) => { submitEnter(event, commitComposer) }} />
-        </div>
-      )}
-      {page === 'stats' && stats !== null && (
-        <div className={css.main}>
-          <p className={css.quote} title={t(`quote.${hour}` as AutoTodoKey)}>{t(`quote.${hour}` as AutoTodoKey)}</p>
-          <section className={css.card}>
-            <h2>{t('insights.title')}</h2>
-            <div className={css.insights}>
-              <Insight number={stats.recent.rate === null ? t('dash') : t('insight.rate.percent', { percent: percentOf(stats.recent.rate) })}
-                module={t('insight.rate.module')} caption={stats.recent.rate === null ? '' : t('insight.rate.caption')}
-                body={stats.recent.total === 0 ? t('insight.rate.none') : t('insight.rate.body', {
-                  done: stats.recent.done,
-                  previous: stats.previous.rate === null ? t('insight.rate.missing') : t('insight.rate.percent', { percent: percentOf(stats.previous.rate) }),
-                  recent: t('insight.rate.percent', { percent: percentOf(stats.month.rate) }),
-                })} />
-              <Insight number={String(stats.activity.current)} module={t('insight.streak.module')} caption={t('insight.streak.caption')}
-                body={`${t('insight.streak.body', {
-                  active: stats.activity.activeDays,
-                  current: stats.activity.current,
-                  longest: stats.activity.longest,
-                })}${stats.activity.weakest === null
-                  ? ''
-                  : t('insight.streak.weakest', { weekday: t(WEEKDAYS[stats.activity.weakest] ?? 'weekday.0') })}`} />
-              <Insight number={stats.tags.completed === null ? t('dash') : String(stats.tags.completed)} module={t('insight.tags.module')}
-                caption={stats.tags.completed === null ? '' : t('insight.tags.caption')}
-                body={stats.tags.completed === null ? t('insight.tags.none') : `${t('insight.tags.body', { count: stats.tags.completed })}${stats.tags.stalled.length === 0 ? '' : t('insight.tags.stalled', { names: stats.tags.stalled.join('、') })}`} />
-              <Insight number={String(stats.ideas.total)} module={t('insight.ideas.module')} caption={t('insight.ideas.caption')}
-                body={`${t('insight.ideas.body', { total: stats.ideas.total, normal: stats.ideas.normal, archived: stats.ideas.archived })}${stats.ideas.dwell === null ? '' : t('insight.ideas.dwell', { days: stats.ideas.dwell })}`} />
+                )
+              })}
+              <div className={css.resize} data-resize role="separator" aria-orientation="horizontal" aria-label={t('nav.tasks')}
+                onPointerDown={(event) => {
+                  const startY = event.clientY
+                  const start = board.listHeight
+                  const move = (ev: PointerEvent): void => { actions.setListHeight(start + ev.clientY - startY, window.innerHeight || 800) }
+                  const up = (): void => {
+                    window.removeEventListener('pointermove', move)
+                    window.removeEventListener('pointerup', up)
+                  }
+                  window.addEventListener('pointermove', move)
+                  window.addEventListener('pointerup', up)
+                }} />
+            </section>
+            <div className={css.tags}>
+              {barTags(board, board.viewedDate).map((tag) => {
+                const paint = tagPaint(tag.color)
+                return (
+                  <span key={tag.id} className={`${css.tag} ${paint.className} ${filter.includes(tag.id) ? css.tagOn : ''} ${tag.pinned ? css.tagPinned : ''}`}
+                    style={paint.style}
+                    title={tag.description || undefined}
+                    onClick={() => {
+                      window.clearTimeout(filterTimer.current as number)
+                      filterTimer.current = window.setTimeout(() => {
+                        setFilter(current => current.includes(tag.id) ? current.filter(id => id !== tag.id) : [...current, tag.id])
+                      }, 220)
+                    }}
+                    onDoubleClick={() => {
+                      window.clearTimeout(filterTimer.current as number)
+                      setTagDraft({ id: tag.id, name: tag.name, description: tag.description, color: tag.color })
+                      setTagsOpen(true)
+                    }}>
+                    {tag.name}
+                    <button
+                      type="button"
+                      className={tag.pinned ? `${css.pin} ${css.pinOn}` : css.pin}
+                      data-no-drag
+                      aria-label={tag.pinned ? t('pin.unpin') : t('pin.pin')}
+                      aria-pressed={tag.pinned}
+                      onClick={(event) => { event.stopPropagation(); actions.togglePin(tag.id) }}
+                    >
+                      <PinMark filled={tag.pinned} />
+                    </button>
+                  </span>
+                )
+              })}
+              <button type="button" className={css.gear} aria-label={t('tags.settings')} onClick={() => { setTagDraft({ name: '', description: '', color: 'blue' }); setTagsOpen(true) }}>{'⚙'}</button>
             </div>
-          </section>
-          <section className={css.card}>
-            <h2>{t('activity.title')}</h2>
-            <div className={css.activity}>
-              {([['activity.active', stats.activity.activeDays], ['activity.current', stats.activity.current], ['activity.longest', stats.activity.longest]] as const).map(([key, value]) => (
-                <p key={key}><strong>{value}</strong><span>{t('activity.unit')}</span><small>{t(key)}</small></p>
-              ))}
-            </div>
-            <div ref={heatRef} className={css.heat}>
-              <div className={css.heatWeekdays}>
-                {SHORT_WEEKDAYS.map(key => <span key={key}>{t(key)}</span>)}
+            <textarea className={css.composer} aria-label={t('composer.placeholder')} placeholder={t('composer.placeholder')} value={composer}
+              onChange={(event) => { setComposer(event.target.value) }}
+              onKeyDown={(event) => { submitEnter(event, commitComposer) }} />
+          </>
+        )}
+        {page === 'stats' && stats !== null && (
+          <>
+            <p className={css.quote} title={t(`quote.${hour}` as AutoTodoKey)}>{t(`quote.${hour}` as AutoTodoKey)}</p>
+            <section className={css.card}>
+              <h2>{t('insights.title')}</h2>
+              <div className={css.insights}>
+                <Insight number={stats.recent.rate === null ? t('dash') : t('insight.rate.percent', { percent: percentOf(stats.recent.rate) })}
+                  module={t('insight.rate.module')} caption={stats.recent.rate === null ? '' : t('insight.rate.caption')}
+                  body={stats.recent.total === 0 ? t('insight.rate.none') : t('insight.rate.body', {
+                    done: stats.recent.done,
+                    previous: stats.previous.rate === null ? t('insight.rate.missing') : t('insight.rate.percent', { percent: percentOf(stats.previous.rate) }),
+                    recent: t('insight.rate.percent', { percent: percentOf(stats.month.rate) }),
+                  })} />
+                <Insight number={String(stats.activity.current)} module={t('insight.streak.module')} caption={t('insight.streak.caption')}
+                  body={`${t('insight.streak.body', {
+                    active: stats.activity.activeDays,
+                    current: stats.activity.current,
+                    longest: stats.activity.longest,
+                  })}${stats.activity.weakest === null
+                    ? ''
+                    : t('insight.streak.weakest', { weekday: t(WEEKDAYS[stats.activity.weakest] ?? 'weekday.0') })}`} />
+                <Insight number={stats.tags.completed === null ? t('dash') : String(stats.tags.completed)} module={t('insight.tags.module')}
+                  caption={stats.tags.completed === null ? '' : t('insight.tags.caption')}
+                  body={stats.tags.completed === null ? t('insight.tags.none') : `${t('insight.tags.body', { count: stats.tags.completed })}${stats.tags.stalled.length === 0 ? '' : t('insight.tags.stalled', { names: stats.tags.stalled.join('、') })}`} />
               </div>
-              <div className={css.heatGrid} style={{ columnGap: (heatWidth - 36 - weekCount * 16) / (weekCount - 1) }}>
-                {weeks.map(week => (
-                  <div key={week.days[0]?.date} className={css.heatWeek}>
-                    {week.days.map((cell) => {
-                      const copy = heatCopy(cell)
-                      return (
-                        <div key={cell.date} role="gridcell" tabIndex={0} data-band={cell.band} data-heat-cell data-col={cell.date}
-                          className={css.cell} aria-label={`${copy.date} ${copy.detail}`}
-                          onMouseEnter={(event) => { showTip(cell, event.currentTarget) }}
-                          onMouseLeave={() => { setTooltip(null) }}
-                          onFocus={(event) => { showTip(cell, event.currentTarget) }}
-                          onBlur={() => { setTooltip(null) }} />
-                      )
-                    })}
-                    <span className={css.month}>{week.month === null ? '' : t('heatmap.month', { month: week.month })}</span>
-                  </div>
+            </section>
+            <section className={css.card}>
+              <h2>{t('activity.title')}</h2>
+              <div className={css.activity}>
+                {([['activity.active', stats.activity.activeDays], ['activity.current', stats.activity.current], ['activity.longest', stats.activity.longest]] as const).map(([key, value]) => (
+                  <p key={key}><strong>{value}</strong><span>{t('activity.unit')}</span><small>{t(key)}</small></p>
                 ))}
               </div>
-            </div>
-            <div className={css.legend}>
-              {(['none', 'zero', 'low', 'mid', 'high'] as const).map(band => (
-                <span key={band}><i data-band={band} />{t(`heatmap.legend.${band}`)}</span>
-              ))}
-            </div>
-            <div className={css.heatNav}>
-              <button type="button" className={css.heatBtn} aria-label={t('heatmap.earlier')} disabled={atStart} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, -7 * weekCount), today, origin)) }}><Chevron dir="left" /></button>
-              <button type="button" className={css.heatBtn} aria-label={t('heatmap.later')} disabled={atEnd} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, 7 * weekCount), today, origin)) }}><Chevron dir="right" /></button>
-            </div>
-          </section>
-          {tooltip !== null && (
-            <div className={css.tip} style={{ left: tooltip.x, top: tooltip.y }} role="tooltip">
-              <strong>{tooltip.date}</strong>
-              <span>{tooltip.detail}</span>
-            </div>
-          )}
-        </div>
-      )}
+              <div ref={heatRef} className={css.heat}>
+                <div className={css.heatWeekdays}>
+                  {SHORT_WEEKDAYS.map(key => <span key={key}>{t(key)}</span>)}
+                </div>
+                <div className={css.heatGrid} style={{ columnGap: (heatWidth - 36 - weekCount * 16) / (weekCount - 1) }}>
+                  {weeks.map(week => (
+                    <div key={week.days[0]?.date} className={css.heatWeek}>
+                      {week.days.map((cell) => {
+                        const copy = heatCopy(cell)
+                        return (
+                          <div key={cell.date} role="gridcell" tabIndex={0} data-band={cell.band} data-heat-cell data-col={cell.date}
+                            className={css.cell} aria-label={`${copy.date} ${copy.detail}`}
+                            onMouseEnter={(event) => { showTip(cell, event.currentTarget) }}
+                            onMouseLeave={() => { setTooltip(null) }}
+                            onFocus={(event) => { showTip(cell, event.currentTarget) }}
+                            onBlur={() => { setTooltip(null) }} />
+                        )
+                      })}
+                      <span className={css.month}>{week.month === null ? '' : t('heatmap.month', { month: week.month })}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={css.legend}>
+                {(['none', 'zero', 'low', 'mid', 'high'] as const).map(band => (
+                  <span key={band}><i data-band={band} />{t(`heatmap.legend.${band}`)}</span>
+                ))}
+              </div>
+              <div className={css.heatNav}>
+                <button type="button" className={css.heatBtn} aria-label={t('heatmap.earlier')} disabled={atStart} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, -7 * weekCount), today, origin)) }}><Chevron dir="left" /></button>
+                <button type="button" className={css.heatBtn} aria-label={t('heatmap.later')} disabled={atEnd} onClick={() => { setTooltip(null); setHeatEnd(clampHeatEnd(addDays(end, 7 * weekCount), today, origin)) }}><Chevron dir="right" /></button>
+              </div>
+            </section>
+            {tooltip !== null && (
+              <div className={css.tip} style={{ left: tooltip.x, top: tooltip.y }} role="tooltip">
+                <strong>{tooltip.date}</strong>
+                <span>{tooltip.detail}</span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
       {dialogTask !== undefined && (
         <Modal open title={t('edit.title')} closeLabel={t('edit.close')} onClose={() => { setEditing(null) }}
           footer={<>
-            <button type="button" onClick={() => { actions.moveToInspiration(dialogTask.id, now()); setEditing(null) }}>{t('edit.inspire')}</button>
             <button type="button" className={css.danger} onClick={() => { actions.deleteTask(dialogTask.id); setEditing(null) }}>{t('edit.delete')}</button>
             <button type="button" onClick={() => { setEditing(null) }}>{t('edit.close')}</button>
           </>}>
@@ -870,13 +868,6 @@ function Insight({ number, module, caption, body }: { number: string; module: st
       <p className={css.caption}>{caption === '' ? module : `${module} · ${caption}`}</p>
       <p>{body}</p>
     </article>
-  )
-}
-
-function RailIcon({ id }: { id: PageId }) {
-  const path = id === 'tasks' ? 'M5 7h14M5 12h14M5 17h10' : 'M5 16V10M10 16V6M15 16v-4M19 16V8'
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d={path} stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" /></svg>
   )
 }
 

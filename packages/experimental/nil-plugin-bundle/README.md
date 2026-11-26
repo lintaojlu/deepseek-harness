@@ -1,5 +1,5 @@
 ---
-description: "Experimental profile bundle for the local task board, whiteboard, CEOS mark, and edit and resend."
+description: "Experimental profile bundle for the local task board, whiteboard, and CEOS mark."
 kind: "package-bundle"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Enable this profile bundle to add the local task board, the whiteboard, the CEOS mark, and in-place edit and resend. It is not an official plugin, so it stays off the Official and Experimental lists. New local plugins are added to this same bundle. Each page belongs to its own plugin.
+Enable this profile bundle to add the local task board, the whiteboard, and the CEOS mark. It is not an official plugin, so it stays off the Official and Experimental lists. New local plugins are added to this same bundle. Each page belongs to its own plugin.
 
 ## Table of Contents
 

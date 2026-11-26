@@ -98,7 +98,7 @@ kind: "package-group"
 | [`client-ui-forge`](client-ui-forge/README.zh.md) | 展示 Session 的 Git 检出、worktree 与已绑定 pull request 的 GUI 面板 | `ctx.forgePanel` |
 | [`forge-bundle`](forge-bundle/README.zh.md) | 默认禁用的 pull request 与 worktree 面板组合 | — |
 | [`client-ui-whiteboard`](client-ui-whiteboard/README.zh.md) | 侧边栏 Excalidraw 画布，可保存在本地，或把画板和提示发送到某个会话 | — |
-| [`nil-plugin-bundle`](nil-plugin-bundle/README.zh.md) | 用于本地任务板、画板、CEOS 标志和编辑并重发的实验性 profile 组合包 | — |
+| [`nil-plugin-bundle`](nil-plugin-bundle/README.zh.md) | 用于本地任务板、画板和 CEOS 标志的实验性 profile 组合包 | — |
 | [`auto-todo`](auto-todo/README.zh.md) | 按日期排列的任务板，带标签、专注计时和统计，保存在这台浏览器里 | — |
 | [`client-ui-ceos`](client-ui-ceos/README.zh.md) | 侧栏中的 CEOS 名称，以及新会话页和浏览器标签页上的 CEOS 标志 | — |
 

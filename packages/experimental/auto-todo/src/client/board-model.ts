@@ -642,7 +642,7 @@ export function setInspirationStatus(board: Board, id: string, status: Inspirati
 function placeTop(board: Board, task: Task, column: Column, index: number): void {
   const previous = detach(task)
   task.column = column
-  const rows = topLevel(board, column).filter(row => row.task?.id !== task.id)
+  const rows = topLevel(board, column).filter(row => row.kind !== 'task' || row.task.id !== task.id)
   const at = Math.max(0, Math.min(index, rows.length))
   rows.splice(at, 0, { kind: 'task', order: 0, task })
   assign(rows)
@@ -767,8 +767,8 @@ export function dissolveGroup(board: Board, id: string): void {
   const group = board.groups.find(item => item.id === id)
   if (group === undefined) return
   const members = childrenOf(board, group.id)
-  const rows = topLevel(board, group.column).filter(row => row.group?.id !== group.id)
-  const at = topLevel(board, group.column).findIndex(row => row.group?.id === group.id)
+  const rows = topLevel(board, group.column).filter(row => row.kind !== 'group' || row.group.id !== group.id)
+  const at = topLevel(board, group.column).findIndex(row => row.kind === 'group' && row.group.id === group.id)
   for (const task of members) {
     task.groupId = null
     task.column = group.column
@@ -796,7 +796,7 @@ export function applyDrop(board: Board, subject: DragSubject, target: DropTarget
     for (const task of board.tasks) {
       if (task.groupId === group.id) task.column = target.column
     }
-    const rows = topLevel(board, target.column).filter(row => row.group?.id !== group.id)
+    const rows = topLevel(board, target.column).filter(row => row.kind !== 'group' || row.group.id !== group.id)
     const index = target.kind === 'append' ? rows.length : Math.max(0, Math.min(target.index, rows.length))
     rows.splice(index, 0, { kind: 'group', order: 0, group })
     assign(rows)

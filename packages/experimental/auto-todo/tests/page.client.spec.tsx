@@ -231,7 +231,7 @@ describe('auto todo page', () => {
     expect(screen.queryByText(text('focus.pick'))).toBeNull()
   })
 
-  it('copies an AI note and moves a task to inspiration', async () => {
+  it('copies an AI note from the task row', async () => {
     const writeText = vi.fn(async () => undefined)
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
     vi.useFakeTimers()
@@ -243,15 +243,12 @@ describe('auto todo page', () => {
     fireEvent.click(screen.getByRole('button', { name: text('copy.copy') }))
     expect(writeText).toHaveBeenCalledWith('请总结')
     await act(async () => { await vi.advanceTimersByTimeAsync(1200) })
-    fireEvent.pointerDown(taskRow('交给模型'), { button: 0, clientX: 4, clientY: 4 })
-    fireEvent.pointerUp(window, { clientX: 4, clientY: 4 })
-    fireEvent.click(screen.getByRole('button', { name: text('edit.inspire') }))
-    expect(instance.getSnapshot().tasks.some(task => task.title === '交给模型')).toBe(false)
-    expect(instance.getSnapshot().inspiration[0]?.title).toBe('交给模型')
     expect(screen.queryByRole('button', { name: text('nav.inspiration') })).toBeNull()
+    expect(screen.queryByText(text('insight.ideas.module'))).toBeNull()
+    expect(screen.queryByRole('button', { name: text('edit.inspire') })).toBeNull()
   })
 
-  it('shows stats, heatmap bands, and the narrow rail', () => {
+  it('shows stats, heatmap bands, and the narrow layout', () => {
     const { instance } = mount()
     change(() => {
       instance.actions.addTask('must', '统计', '2026-11-22', [], NOW)
@@ -271,7 +268,7 @@ describe('auto todo page', () => {
     fireEvent.click(screen.getByRole('button', { name: text('heatmap.earlier') }))
     fireEvent.click(screen.getByRole('button', { name: text('heatmap.later') }))
     act(() => { window.innerWidth = 800; window.dispatchEvent(new Event('resize')) })
-    expect(document.querySelector('nav')?.parentElement?.className ?? '').toMatch(/narrow/)
+    expect(document.querySelector('nav')?.parentElement?.parentElement?.parentElement?.className ?? '').toMatch(/narrow/)
   })
 
   it('walks date controls, notes, sync choices, resize, and a rejected copy', async () => {

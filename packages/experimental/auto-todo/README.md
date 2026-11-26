@@ -24,7 +24,7 @@ Adds one Auto todo page to the sidebar. The page shows must-do and optional colu
 <a id="use-this-package"></a>
 ## Use this package
 
-Enable the [Nil plugin bundle](../nil-plugin-bundle/README.md). Open Auto todo from the sidebar. Add a task in either column. Click a row to edit it. The gear opens tags. Stats sits on the page rail.
+Enable the [Nil plugin bundle](../nil-plugin-bundle/README.md). Open Auto todo from the sidebar. Add a task in either column. Click a row to edit it. The gear opens tags. Tasks and Stats switch in the page header.
 
 ### Minimal configuration
 

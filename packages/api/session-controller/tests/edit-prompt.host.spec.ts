@@ -24,7 +24,7 @@ it('reports an absent backend and edits a current prompt through the Session API
   if (target === undefined) throw new Error('Missing user prompt')
   const request = { sessionId: agent.id, targetSeq: target.seq, content: [{ type: 'text' as const, text: 'Corrected prompt' }] }
   await expect(api.editPrompt(request, new AbortController().signal)).rejects.toMatchObject({ code: 'session/rollback-not-mounted' })
-  await ctx.plugin(RollbackService)
+  await ctx.plugin(RollbackService, {})
   const result = await api.editPrompt(request, new AbortController().signal)
   await agent.whenIdle()
   expect(result.reset.startSeq).toBe(target.seq)

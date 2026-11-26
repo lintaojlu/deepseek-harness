@@ -23,7 +23,6 @@ describe('Nil plugin bundle', () => {
       '@deepseek-ai/dsh-client-ui-auto-todo': 'workspace:*',
       '@deepseek-ai/dsh-client-ui-ceos': 'workspace:*',
       '@deepseek-ai/dsh-client-ui-whiteboard': 'workspace:*',
-      '@deepseek-ai/dsh-rollback': 'workspace:*',
     })
     expect(yaml.load(readFileSync(new URL(`../${manifest.dsh.bundle.patch}`, import.meta.url), 'utf8'), {
       schema: entryListSchema,
@@ -31,7 +30,6 @@ describe('Nil plugin bundle', () => {
       { id: 'auto-todo', name: '@deepseek-ai/dsh-client-ui-auto-todo' },
       { id: 'whiteboard', name: '@deepseek-ai/dsh-client-ui-whiteboard' },
       { id: 'ceos-ui', name: '@deepseek-ai/dsh-client-ui-ceos' },
-      { id: 'rollback', name: '@deepseek-ai/dsh-rollback' },
     ] }])
   })
 

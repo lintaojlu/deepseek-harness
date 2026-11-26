@@ -17,6 +17,7 @@
   --heat-mid: #3b6fe8;
   --heat-high: #8eb0f5;
   display: flex;
+  flex-direction: column;
   min-height: 100%;
   background: var(--paper);
   color: var(--ink);
@@ -34,22 +35,6 @@
   cursor: default;
 }
 
-.narrow {
-  /* The rail keeps its icon column. The board stacks under 960px. */
-}
-
-.narrow .rail span {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-}
-
-.narrow .rail {
-  width: 56px;
-}
-
 .narrow .board {
   flex-direction: column;
 }
@@ -58,44 +43,39 @@
   grid-template-columns: 1fr;
 }
 
-.rail {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 168px;
-  padding: 16px 12px;
-  border-right: 0.5px solid var(--line);
-}
-
-.rail button,
-.railButton,
-.railOn {
+.switcher {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
+  gap: 4px;
+}
+
+.switchBtn,
+.switchOn {
+  height: 32px;
   padding: 0 10px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
   color: var(--muted);
   font: inherit;
-  text-align: left;
+  font-family: "Songti SC", "STSong", Georgia, serif;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
-.rail svg {
-  width: 18px;
-  height: 18px;
-  flex: none;
+.switchOn {
+  color: var(--ink);
 }
 
-.rail button:hover,
-.railOn {
+.switchBtn:hover {
   background: var(--well);
   color: var(--ink);
 }
 
-.rail button:active {
+.switchBtn:active,
+.switchOn:active {
   background: var(--card-2);
 }
 
