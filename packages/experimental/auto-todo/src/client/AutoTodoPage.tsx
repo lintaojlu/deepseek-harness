@@ -77,7 +77,9 @@ function submitEnter(event: ReactKeyboardEvent, submit: () => void): void {
  * @param props - board store, clock, and copy.
  * @returns the tasks or stats page.
  */
-export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageProps) {
+type AutoTodoPageInput = Pick<AutoTodoPageProps, 'useStore' | 'actions' | 'now' | 't'>
+
+export function AutoTodoPage({ useStore, actions, now, t }: AutoTodoPageInput) {
   const stored = useStore(state => state)
   const board = isBoard(stored) ? stored : null
   const [page, setPage] = useState<PageId>('tasks')

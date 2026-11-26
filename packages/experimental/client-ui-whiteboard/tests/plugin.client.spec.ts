@@ -8,7 +8,6 @@ import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { SidebarRightTabRegistry } from '@deepseek-ai/dsh-client-ui-sidebar-right/src/client/tab-registry.ts'
 import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import * as discovery from '../src/index.ts'
 import { WHITEBOARD_ID, WHITEBOARD_KIND, apply, inject } from '../src/client/index.ts'
@@ -23,6 +22,15 @@ vi.mock('@excalidraw/excalidraw', () => ({
 vi.mock('../src/client/excalidraw.css?inline', () => ({ default: '.excalidraw{height:100%}' }))
 
 const emptyList: SessionListState = { ids: [], byId: {}, phase: 'ready', projectionsBySession: {} }
+
+function isWhiteboardInjected(value: object): value is WhiteboardInjected {
+  if (!('sessionId' in value) || typeof value.sessionId !== 'string') return false
+  if (!('prefersDark' in value) || typeof value.prefersDark !== 'function') return false
+  if (!('queueDrawing' in value) || typeof value.queueDrawing !== 'function') return false
+  if (!('storage' in value) || typeof value.storage !== 'object' || value.storage === null) return false
+  if (!('hooks' in value) || typeof value.hooks !== 'object' || value.hooks === null) return false
+  return 'catalog' in value.hooks
+}
 
 async function fixture() {
   const ctx = new Context()
@@ -71,7 +79,9 @@ describe('whiteboard plugin', () => {
     expect(document.head.querySelector('style[data-plugin-css="dsh-whiteboard-excalidraw"]')?.textContent)
       .toBe('.excalidraw{height:100%}')
     const entry = ctx.slots.entries('sidebar.right.pane.tab')[0]!
-    const injected = (entry.inject as (id: SessionId) => WhiteboardInjected)('shown' as SessionId)
+    if (entry.inject === undefined) throw new Error('whiteboard inject is missing')
+    const injected = entry.inject('shown' as never)
+    if (!isWhiteboardInjected(injected)) throw new Error('whiteboard inject is missing')
     expect(injected.sessionId).toBe('shown')
     expect(injected.prefersDark()).toBe(false)
     await expect(injected.queueDrawing(injected.sessionId, 'explain', new Blob(['a']))).resolves.toEqual({ ok: true })

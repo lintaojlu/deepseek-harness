@@ -8,7 +8,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
  * @param props - requested edge. The sidebar owns the accessible name.
  * @returns a decorative checklist icon.
  */
-export function AutoTodoIcon({ size }: PropsRuntime<'sidebar.panellist'>) {
+export function AutoTodoIcon({ size }: Pick<PropsRuntime<'sidebar.panellist'>, 'size'>) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="4" y="3.5" width="16" height="17" rx="3" stroke="currentColor" strokeWidth="1.6" />

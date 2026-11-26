@@ -3,9 +3,8 @@
 import { readFileSync } from 'node:fs'
 import '../src/index.ts'
 import { describe, expect, it } from 'vitest'
-import { entryListSchema } from '@deepseek-ai/cordis-plugin-include'
+import { parseEntryYaml } from '@deepseek-ai/cordis-plugin-include'
 import { EXPERIMENTAL_BUNDLES, MORE_BUNDLES, OPTIONAL_BUNDLES } from '@deepseek-ai/dsh-official-bundles'
-import * as yaml from 'js-yaml'
 
 const NAME = '@deepseek-ai/dsh-nil-plugin-bundle'
 
@@ -24,9 +23,7 @@ describe('Nil plugin bundle', () => {
       '@deepseek-ai/dsh-client-ui-ceos': 'workspace:*',
       '@deepseek-ai/dsh-client-ui-whiteboard': 'workspace:*',
     })
-    expect(yaml.load(readFileSync(new URL(`../${manifest.dsh.bundle.patch}`, import.meta.url), 'utf8'), {
-      schema: entryListSchema,
-    })).toEqual([{ insert: [
+    expect(parseEntryYaml(readFileSync(new URL(`../${manifest.dsh.bundle.patch}`, import.meta.url), 'utf8'))).toEqual([{ insert: [
       { id: 'auto-todo', name: '@deepseek-ai/dsh-client-ui-auto-todo' },
       { id: 'whiteboard', name: '@deepseek-ai/dsh-client-ui-whiteboard' },
       { id: 'ceos-ui', name: '@deepseek-ai/dsh-client-ui-ceos' },

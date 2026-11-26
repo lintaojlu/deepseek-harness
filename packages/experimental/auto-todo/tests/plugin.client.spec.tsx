@@ -52,9 +52,10 @@ describe('auto todo plugin', () => {
     expect(panel.options.id).toBe(PANEL_ID)
     const injected = (ctx.slots.entries('main')[0]!.inject as () => { now: () => number })()
     expect(injected.now()).toBeGreaterThan(0)
-    expect(panel.options.label()).toBe(en.panel)
+    const label = panel.options.label
+    expect(typeof label === 'function' ? label() : label).toBe(en.panel)
     ctx.locale.setLocale('zh')
-    expect(panel.options.label()).toBe(zh.panel)
+    expect(typeof label === 'function' ? label() : label).toBe(zh.panel)
     await fiber.dispose()
     expect(ctx.slots.entries('main')).toEqual([])
     expect(ctx.slots.entries('sidebar.panellist')).toEqual([])

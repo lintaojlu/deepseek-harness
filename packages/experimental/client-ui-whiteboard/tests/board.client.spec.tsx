@@ -71,7 +71,6 @@ function view(storage: Memory, queueDrawing: WhiteboardInjected['queueDrawing'],
       storage={createWhiteboardStorage(storage)}
       prefersDark={() => false}
       queueDrawing={queueDrawing}
-      hooks={{ catalog: list }}
       useCatalog={bindSnapshotSelector(list)}
       t={makeTranslate(en)}
     />,
@@ -155,7 +154,7 @@ describe('WhiteboardView', () => {
     view(storage, queue)
     fireEvent.click(screen.getByRole('button', { name: 'Send to session' }))
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'explain' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Send', exact: true }))
+    fireEvent.click(screen.getByRole('button', { name: (name: string) => name === 'Send' }))
     expect(queue).not.toHaveBeenCalled()
   })
 
@@ -165,12 +164,12 @@ describe('WhiteboardView', () => {
     const queue = vi.fn(() => new Promise<{ ok: true } | { ok: false }>((resolve) => { finish = resolve }))
     view(storage, queue, catalog([alpha, missing]), missing)
     fireEvent.click(screen.getByRole('button', { name: 'Send to session' }))
-    expect(screen.getByRole('button', { name: 'Send', exact: true })).toHaveProperty('disabled', true)
+    expect(screen.getByRole('button', { name: (name: string) => name === 'Send' })).toHaveProperty('disabled', true)
     expect(screen.getAllByRole('option').map(option => option.textContent)).toEqual(['Choose a session', 'Alpha'])
     fireEvent.change(screen.getByRole('combobox'), { target: { value: '' } })
     fireEvent.change(screen.getByRole('combobox'), { target: { value: alpha } })
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '  explain  ' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Send', exact: true }))
+    fireEvent.click(screen.getByRole('button', { name: (name: string) => name === 'Send' }))
     expect(await screen.findByRole('button', { name: 'Sending' })).toBeTruthy()
     fireEvent.click(screen.getAllByRole('button', { name: 'Cancel' }).find(button => !button.hasAttribute('disabled'))!)
     expect(screen.getByRole('dialog')).toBeTruthy()
@@ -182,11 +181,11 @@ describe('WhiteboardView', () => {
     fireEvent.change(screen.getByRole('combobox'), { target: { value: alpha } })
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'again' } })
     queue.mockImplementationOnce(async () => ({ ok: false }))
-    fireEvent.click(screen.getByRole('button', { name: 'Send', exact: true }))
+    fireEvent.click(screen.getByRole('button', { name: (name: string) => name === 'Send' }))
     expect(await screen.findByText(en['status.sendFailed'])).toBeTruthy()
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     control.fail = true
-    fireEvent.click(screen.getByRole('button', { name: 'Send', exact: true }))
+    fireEvent.click(screen.getByRole('button', { name: (name: string) => name === 'Send' }))
     expect(await screen.findByText(en['status.sendFailed'])).toBeTruthy()
     expect(error).toHaveBeenCalled()
   })
