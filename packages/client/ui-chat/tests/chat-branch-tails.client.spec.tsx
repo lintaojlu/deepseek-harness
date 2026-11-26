@@ -84,6 +84,7 @@ function MessageItem({ node, t: translate, referenceLabels, skillNames }: Messag
   const props: Partial<Omit<ChatNodeViewProps, 'node'>> & { node: ChatConversationViewNode } = {
     node: viewNode, t: translate, loadImage: unusedImageLoader, renderFactorySlot: renderUserFactory,
     openFile: vi.fn(), useChat: useDetachedChat,
+    useSession: selector => selector({ running: false } as never), useProjection: () => undefined, useAccess: () => true,
   }
   switch (node.kind) {
     case 'user':

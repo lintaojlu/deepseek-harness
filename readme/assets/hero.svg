@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img">
+  <title>DeepSeek Harness：一切皆插件</title>
+  <desc>上半是项目名和「一切皆插件」。下半四张插件卡坐在同一条轨道上，分别表示模型、工具、循环和会话日志。</desc>
+  <rect width="1200" height="720" fill="#F4F7FF"/>
+  <g id="hero-copy" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <text x="72" y="108" font-size="22" font-weight="600" fill="#3964FE">DeepSeek AI</text>
+    <text x="72" y="196" font-size="68" font-weight="700" fill="#172033">DeepSeek Harness</text>
+    <text x="72" y="268" font-size="44" font-weight="600" fill="#172033">一切皆插件</text>
+    <text x="72" y="324" font-size="28" fill="#4E5D78">模型、工具、循环和会话日志挂在同一棵 Cordis 配置上</text>
+  </g>
+  <g id="context-rail">
+    <rect x="72" y="628" width="1056" height="16" rx="8" fill="#3964FE"/>
+  </g>
+  <g id="plugin-row" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g id="plugin-model">
+      <rect x="72" y="400" width="228" height="176" rx="16" fill="#FFFFFF" stroke="#D5DEF2" stroke-width="2"/>
+      <rect x="96" y="424" width="36" height="8" rx="4" fill="#3964FE"/>
+      <text x="186" y="508" font-size="36" font-weight="700" fill="#172033" text-anchor="middle">模型</text>
+      <rect x="170" y="576" width="32" height="64" rx="6" fill="#3964FE"/>
+    </g>
+    <g id="plugin-tools">
+      <rect x="348" y="400" width="228" height="176" rx="16" fill="#FFFFFF" stroke="#D5DEF2" stroke-width="2"/>
+      <rect x="372" y="424" width="36" height="8" rx="4" fill="#2A2FB6"/>
+      <text x="462" y="508" font-size="36" font-weight="700" fill="#172033" text-anchor="middle">工具</text>
+      <rect x="446" y="576" width="32" height="64" rx="6" fill="#2A2FB6"/>
+    </g>
+    <g id="plugin-loop">
+      <rect x="624" y="400" width="228" height="176" rx="16" fill="#FFFFFF" stroke="#D5DEF2" stroke-width="2"/>
+      <rect x="648" y="424" width="36" height="8" rx="4" fill="#6D5BD0"/>
+      <text x="738" y="508" font-size="36" font-weight="700" fill="#172033" text-anchor="middle">循环</text>
+      <rect x="722" y="576" width="32" height="64" rx="6" fill="#6D5BD0"/>
+    </g>
+    <g id="plugin-log">
+      <rect x="900" y="400" width="228" height="176" rx="16" fill="#FFFFFF" stroke="#D5DEF2" stroke-width="2"/>
+      <rect x="924" y="424" width="36" height="8" rx="4" fill="#0E8FA8"/>
+      <text x="1014" y="508" font-size="36" font-weight="700" fill="#172033" text-anchor="middle">日志</text>
+      <rect x="998" y="576" width="32" height="64" rx="6" fill="#0E8FA8"/>
+    </g>
+  </g>
+</svg>

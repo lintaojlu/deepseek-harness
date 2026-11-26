@@ -1,9 +1,9 @@
 // Shared IconActions chrome for user and assistant messages: copy
 // live, optional branch wiring, and an optional date-aware clock.
 
-import { useId, type ReactNode } from 'react'
+import { useId, type ReactNode, type Ref } from 'react'
 import {
-  IconBranchOutlineRegular, IconCheckOutlineRegular, IconCopyOutlineRegular, Tooltip, useClipboardCopy,
+  IconBranchOutlineRegular, IconCheckOutlineRegular, IconCopyOutlineRegular, IconEditOutlineRegular, Tooltip, useClipboardCopy,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ChatViewSlotProps } from '../contract/slots.ts'
 import { formatMessageClock } from './message-chrome.ts'
@@ -17,6 +17,12 @@ export interface MessageIconActionsProps {
   time?: number | undefined
   /** Clock before icons (user) or after (assistant). */
   clock: 'start' | 'end'
+  /** Open the original prompt for editing and resubmission in this session. */
+  onEdit?: (() => void) | undefined
+  /** Editing waits for the session to become idle. */
+  editUnavailable?: boolean | undefined
+  /** Restore keyboard focus to the edit action after cancelling its editor. */
+  editButtonRef?: Ref<HTMLButtonElement> | undefined
   /** Fork the session at this message; omission hides the branch action. */
   onBranch?: (() => void) | undefined
   /** The message is not a completed transcript tail, so branch stays visible but unavailable. */
@@ -44,7 +50,7 @@ export interface MessageIconActionsProps {
  */
 export function MessageIconActions({
   text, time, clock, onBranch, branchUnavailable = false, className,
-  extraActions, usageAction, t,
+  onEdit, editUnavailable = false, editButtonRef, extraActions, usageAction, t,
 }: MessageIconActionsProps) {
   const day = useCalendarDay()
   const reasonId = useId()
@@ -57,6 +63,15 @@ export function MessageIconActions({
   return (
     <div className={className === undefined ? css.actions : `${css.actions} ${className}`} data-clock={clock}>
       {clock === 'start' ? clockEl : null}
+      {onEdit !== undefined && (
+        <Tooltip label={editUnavailable ? t('message.edit.unavailable') : t('message.edit')} side="bottom">
+          <button ref={editButtonRef} type="button" className={css.action} aria-label={t('message.edit')}
+            aria-disabled={editUnavailable || undefined} data-unavailable={editUnavailable || undefined}
+            onClick={editUnavailable ? undefined : onEdit}>
+            <IconEditOutlineRegular />
+          </button>
+        </Tooltip>
+      )}
       <Tooltip label={copied ? t('copied') : t('copy')} side="bottom">
         <button type="button" className={css.action} aria-label={copied ? t('copied') : t('copy')} onClick={onCopy}>
           {copied ? <IconCheckOutlineRegular /> : <IconCopyOutlineRegular />}

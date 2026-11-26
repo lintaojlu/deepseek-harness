@@ -1,0 +1,931 @@
+.page {
+  --paper: #141414;
+  --card: #1c1c1c;
+  --card-2: #242424;
+  --well: #2a2a2a;
+  --hover: rgb(255 255 255 / 4%);
+  --line: rgb(255 255 255 / 8%);
+  --line-strong: rgb(255 255 255 / 16%);
+  --ink: #f4f4f5;
+  --muted: #a1a1aa;
+  --faint: #71717a;
+  --danger: #e08a3c;
+  --time: #2563eb;
+  --heat-none: #2a2a2a;
+  --heat-zero: #1a3358;
+  --heat-low: #2f5fbf;
+  --heat-mid: #3b6fe8;
+  --heat-high: #8eb0f5;
+  display: flex;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+.page button {
+  cursor: pointer;
+  transition: background 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page button:disabled {
+  cursor: default;
+}
+
+.narrow {
+  /* The rail keeps its icon column. The board stacks under 960px. */
+}
+
+.narrow .rail span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.narrow .rail {
+  width: 56px;
+}
+
+.narrow .board {
+  flex-direction: column;
+}
+
+.narrow .insights {
+  grid-template-columns: 1fr;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 168px;
+  padding: 16px 12px;
+  border-right: 0.5px solid var(--line);
+}
+
+.rail button,
+.railButton,
+.railOn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+}
+
+.rail svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.rail button:hover,
+.railOn {
+  background: var(--well);
+  color: var(--ink);
+}
+
+.rail button:active {
+  background: var(--card-2);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 24px 28px;
+}
+
+.header,
+.dateTools,
+.columnHead,
+.tags,
+.heatNav,
+.legend,
+.activity {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.header h1,
+.main h1,
+.card h2,
+.quote,
+.insight strong,
+.activity strong {
+  font-family: "Songti SC", "STSong", Georgia, serif;
+}
+
+.header h1,
+.main h1,
+.card h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.dateTools {
+  gap: 8px;
+}
+
+.date {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.today,
+.gear,
+.primary,
+.abandon,
+.syncOn,
+.tag,
+.tagOn,
+.pin,
+.box,
+.boxOn {
+  border: 0.5px solid var(--line);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.today,
+.gear {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  corner-shape: round;
+}
+
+.board {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  min-height: 160px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: 16px;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.columnHead {
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.column input,
+.composer,
+.note textarea,
+.group input,
+.card input,
+.main input,
+.main select,
+.main textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 0.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  padding: 8px 10px;
+}
+
+.list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+}
+
+.empty {
+  margin: 12px 0;
+  color: var(--faint);
+}
+
+.row,
+.group {
+  position: relative;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 6px;
+  border-bottom: 0.5px solid var(--line);
+  border-radius: 8px;
+  cursor: grab;
+}
+
+.box,
+.boxOn {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 4px;
+  corner-shape: round;
+}
+
+.box {
+  background: var(--paper);
+}
+
+.boxOn {
+  background: var(--ink);
+}
+
+.boxOn::after {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 4px;
+  margin: 3px auto 0;
+  border-bottom: 1.5px solid var(--paper);
+  border-left: 1.5px solid var(--paper);
+  transform: rotate(-45deg);
+}
+
+.doneTitle {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+.time {
+  color: var(--time);
+}
+
+.pill {
+  border: 0.5px solid var(--line);
+  border-radius: 999px;
+  corner-shape: round;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  corner-shape: round;
+}
+
+.ring {
+  width: 14px;
+  height: 14px;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.ringValue,
+.focusValue {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-dasharray: var(--length, 75);
+  stroke-dashoffset: var(--offset, 75);
+  transition: stroke-dashoffset 0.4s linear;
+}
+
+.focusValue {
+  stroke-dasharray: 754;
+  stroke-dashoffset: calc(754 * (1 - var(--ratio, 1)));
+  transform-origin: 140px 140px;
+  transform: rotate(-90deg);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  border: 1.5px solid var(--line);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  corner-shape: round;
+  animation: spin 0.8s linear infinite;
+}
+
+.status,
+.fail {
+  position: absolute;
+  right: 8px;
+  bottom: -2px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.status {
+  color: var(--faint);
+}
+
+.fail,
+.danger,
+.abandon {
+  color: var(--danger);
+}
+
+.group {
+  margin: 4px 0;
+  padding: 8px;
+  border: 0.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card-2);
+}
+
+.group .row {
+  border-bottom: 0;
+}
+
+.insert {
+  height: 2px;
+  background: var(--ink);
+}
+
+.collapsed {
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+}
+
+.pairBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px;
+  border: 0.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card-2);
+}
+
+.resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 12px;
+  cursor: ns-resize;
+}
+
+.resize::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: transparent;
+}
+
+.resize:hover::before {
+  background: var(--line-strong);
+}
+
+.grabbing,
+.grabbing .row {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.tags {
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.tag,
+.tagOn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  corner-shape: round;
+  color: white;
+}
+
+.tagOn {
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.tagPinned {
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.pin {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  opacity: 0;
+  background: var(--card);
+}
+
+.tag:focus-within .pin,
+.tagOn:focus-within .pin {
+  opacity: 1;
+}
+
+.gear {
+  width: 28px;
+  border-radius: 999px;
+  corner-shape: round;
+  background: var(--paper);
+}
+
+.composer {
+  min-height: 64px;
+  margin-top: 16px;
+}
+
+.focusing .composer {
+  transform: translateY(120%);
+}
+
+.quote {
+  margin: 0 0 16px;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.card {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: 16px;
+}
+
+.insights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.insight {
+  min-height: 116px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card-2);
+}
+
+.insight strong {
+  display: block;
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 500;
+}
+
+.caption,
+.insight p,
+.activity small,
+.month,
+.legend,
+.heatWeekdays {
+  color: var(--muted);
+}
+
+.caption {
+  margin: 4px 0;
+}
+
+.activity {
+  justify-content: center;
+  gap: 32px;
+  margin: 12px 0 20px;
+}
+
+.activity p {
+  margin: 0;
+  text-align: center;
+}
+
+.activity strong {
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 500;
+}
+
+.activity span {
+  margin-left: 4px;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.activity small,
+.heatWeekdays,
+.month {
+  display: block;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.heat {
+  display: flex;
+  gap: 8px;
+}
+
+.heatWeekdays {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.heatGrid {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.heatWeek {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cell,
+.legend i {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  corner-shape: round;
+  background: var(--heat-none);
+}
+
+.legend i {
+  width: 14px;
+  height: 14px;
+}
+
+.cell[data-band="zero"],
+.legend i[data-band="zero"] { background: var(--heat-zero); }
+.cell[data-band="low"],
+.legend i[data-band="low"] { background: var(--heat-low); }
+.cell[data-band="mid"],
+.legend i[data-band="mid"] { background: var(--heat-mid); }
+.cell[data-band="high"],
+.legend i[data-band="high"] { background: var(--heat-high); }
+
+.cell[data-band="future"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 28%);
+}
+
+.cell {
+  cursor: pointer;
+}
+
+.cell:hover,
+.cell:focus {
+  outline: 1px solid rgb(255 255 255 / 70%);
+  outline-offset: 1px;
+}
+
+.cell:active {
+  outline-color: var(--ink);
+}
+
+.legend {
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.heatNav {
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.heatNav button:disabled {
+  opacity: 0.35;
+}
+
+.tip {
+  position: fixed;
+  z-index: 5;
+  min-width: 132px;
+  max-width: 240px;
+  padding: 8px 12px 9px;
+  background: var(--card);
+  border: 0.5px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 45%);
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.tip strong,
+.tip span {
+  display: block;
+}
+
+.tip strong {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
+.tip span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tip::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  border: 6px solid transparent;
+  border-top-color: var(--card);
+  border-bottom: 0;
+  transform: translateX(-50%);
+}
+
+.focus {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 72%);
+  backdrop-filter: blur(8px);
+}
+
+.dial {
+  position: relative;
+  width: 280px;
+  height: 280px;
+}
+
+.dialSvg {
+  width: 280px;
+  height: 280px;
+}
+
+.dial p,
+.dial strong {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.dial p { top: 108px; }
+.dial strong {
+  top: 128px;
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.handle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: -8px;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+  background: var(--ink);
+  cursor: grabbing;
+}
+
+.focusTitle {
+  max-width: 420px;
+  text-align: center;
+}
+
+.primary {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.primary:hover {
+  background: #fff;
+}
+
+.primary:active {
+  background: var(--muted);
+}
+
+.abandon {
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+}
+
+.note,
+.noteOpen {
+  margin: 8px 0;
+  padding: 10px;
+  background: var(--card);
+  border-radius: 12px;
+}
+
+.noteText {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.noteOpen .noteText {
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
+button[class*='swatch-'] {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  corner-shape: round;
+}
+
+.swatch-white { background: #f5f5f5; color: #141414; }
+.swatch-orange { background: #e08a3c; color: #141414; }
+.swatch-amber { background: #e2b15a; color: #141414; }
+.swatch-green { background: #7dcea0; color: #141414; }
+.swatch-cyan { background: #7fd3d0; color: #141414; }
+.swatch-blue { background: #2563eb; color: white; }
+.swatch-violet { background: #7c5cbf; color: white; }
+.swatch-pink { background: #d46a9a; color: white; }
+.swatch-red { background: #d4534e; color: white; }
+
+.iconBtn,
+.heatBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.heatBtn {
+  width: 36px;
+  border: 0.5px solid var(--line-strong);
+  background: var(--card-2);
+  color: var(--ink);
+}
+
+.iconBtn:hover,
+.heatBtn:hover:not(:disabled),
+.today:hover,
+.gear:hover,
+.dateTools button:hover,
+.syncRow:hover,
+.syncOn {
+  background: var(--well);
+  color: var(--ink);
+}
+
+.iconBtn:active,
+.heatBtn:active:not(:disabled),
+.today:active,
+.gear:active,
+.syncRow:active,
+.tag:active,
+.tagOn:active,
+.box:active {
+  background: var(--card-2);
+}
+
+.dateTools .iconDanger:hover,
+.iconDanger:hover {
+  color: var(--danger);
+  background: rgb(225 74 14 / 16%);
+}
+
+.syncRow {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.box:hover {
+  border-color: var(--ink);
+}
+
+.column input:hover,
+.composer:hover,
+.main input:hover,
+.main textarea:hover,
+.main select:hover {
+  border-color: var(--line-strong);
+}
+
+.column input:focus,
+.composer:focus,
+.main input:focus,
+.main textarea:focus,
+.main select:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.tag,
+.tagOn {
+  cursor: pointer;
+}
+
+.pinOn {
+  color: var(--ink);
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .row:hover { background: var(--hover); }
+  .row:active { background: var(--well); }
+  .tag:hover .pin,
+  .tagOn:hover .pin { opacity: 1; }
+  .tag:hover,
+  .tagOn:hover { filter: brightness(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringValue,
+  .focusValue,
+  .spinner { transition: none; animation: none; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

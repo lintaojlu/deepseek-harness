@@ -1,0 +1,50 @@
+{
+  "before": [
+    {
+      "role": "system",
+      "text": "You are an AI agent powered by DeepSeek Harness."
+    },
+    {
+      "role": "user",
+      "text": "Keep earlier context"
+    },
+    {
+      "role": "assistant",
+      "text": "Answer 1"
+    },
+    {
+      "role": "user",
+      "text": "Wrong prompt"
+    },
+    {
+      "role": "assistant",
+      "text": "Answer 2"
+    },
+    {
+      "role": "user",
+      "text": "Also discard this follow-up"
+    }
+  ],
+  "after": [
+    {
+      "role": "system",
+      "text": "You are an AI agent powered by DeepSeek Harness."
+    },
+    {
+      "role": "user",
+      "text": "Keep earlier context"
+    },
+    {
+      "role": "assistant",
+      "text": "Answer 1"
+    },
+    {
+      "role": "user",
+      "text": "Conversation restarted."
+    },
+    {
+      "role": "user",
+      "text": "Corrected prompt"
+    }
+  ]
+}

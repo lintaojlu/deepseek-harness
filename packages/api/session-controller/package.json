@@ -123,6 +123,7 @@
     }
   },
   "devDependencies": {
+    "@deepseek-ai/dsh-rollback": "workspace:*",
     "@deepseek-ai/dsh-api-remote-access": "workspace:*",
     "@deepseek-ai/cordis": "workspace:~",
     "@deepseek-ai/dsh-agent": "workspace:*",

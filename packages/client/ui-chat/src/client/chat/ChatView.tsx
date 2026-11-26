@@ -18,6 +18,8 @@ import { mergeTurnRailItems } from './turn-rail-items.ts'
 import { useTextInteraction } from './text-interaction.ts'
 import { useChatScroll } from './use-chat-scroll.ts'
 import { fileMediaUrl, resolveWorkspacePath, sessionFileAddress } from '@deepseek-ai/dsh-util-workspace-path'
+import type {} from '@deepseek-ai/dsh-rollback/types'
+import { isRolledBackSeq, rolledBackTurnSet, rollbackIntervals, rollbackTurnOutline } from './rollback-visibility.ts'
 import css from './ChatView.module.css'
 
 /** Host/OS refusal text for the file-open dialog; empty throws keep a locale fallback. */
@@ -77,10 +79,22 @@ export function ChatView({
     }
   }), [getTriggerProps, resolveFilePath, sessionId])
   const order = useChat(s => s.order)
-  const groupedEntries = useConversation(snapshot => snapshot.views.grouped('chat')?.entries)
-  const entries = useMemo<readonly RenderEntry[]>(() => groupedEntries
-    ?? order.map(key => ({ kind: 'node', key: key as NodeKey })), [groupedEntries, order])
   const nodeStore = useChat(s => s.nodes)
+  const groupedEntries = useConversation(snapshot => snapshot.views.grouped('chat')?.entries)
+  // Rolled-back raw-log intervals hide flat transcript rows; the turn set hides rail marks.
+  const rollback = useProjection('rollback')
+  const resetIntervals = useMemo(() => rollbackIntervals(rollback), [rollback])
+  const entries = useMemo<readonly RenderEntry[]>(() => {
+    const base = groupedEntries ?? order.map(key => ({ kind: 'node', key: key as NodeKey }))
+    if (resetIntervals.length === 0) return base
+    return base.filter((entry) => {
+      // Groups are filtered by their owning Turn inside ChatGroupSeat, which
+      // reads membership without scanning the flat node list here.
+      if (entry.kind === 'group') return true
+      const node = nodeStore.get(entry.key)
+      return node === undefined || !isRolledBackSeq(node.anchorSeq, resetIntervals)
+    })
+  }, [groupedEntries, order, nodeStore, resetIntervals])
   const deferCompletedTurns = usePresentation(policy => policy.collapseTiming === 'next-input')
   const transcriptView = usePresentation(policy => policy.mode)
   // The rail's items are accumulated in the Chat snapshot, so this selector is
@@ -90,9 +104,14 @@ export function ChatView({
   // Host-computed whole-log outline; the merge is view-layer only (the
   // conversation snapshot never carries projection values).
   const turnOutline = useProjection('turnOutline')
+  const rolledBackTurns = useMemo(
+    () => rolledBackTurnSet(rollbackTurnOutline(turnOutline), resetIntervals),
+    [turnOutline, resetIntervals],
+  )
   const railItems = useMemo(
-    () => mergeTurnRailItems(turnNavigationItems, turnOutline),
-    [turnNavigationItems, turnOutline],
+    () => mergeTurnRailItems(turnNavigationItems, turnOutline)
+      .filter(item => !rolledBackTurns.has(item.turn)),
+    [turnNavigationItems, turnOutline, rolledBackTurns],
   )
   const inbox = useProjection('inbox') as InboxState | undefined
   // Workspace root off the session list row: path summaries display relative to it.
@@ -250,7 +269,7 @@ export function ChatView({
               fileImages={fileImages}
             >
               {renderSlot('conversation.chat.flow', {
-                entries, pendingInputs, lastInputTurn, deferCollapse,
+                entries, pendingInputs, lastInputTurn, deferCollapse, rolledBackTurns,
                 cwd, openFile: requestOpenFile, inspectCall, forkAt, loadImage,
               }, { hookContext: flowContext })}
             </MarkdownDelegateProvider>

@@ -425,6 +425,8 @@ function makeHarness(
   const loadThrough = vi.fn<(seq: number) => Promise<void>>().mockResolvedValue(undefined)
   // Mutable outline holder: tests swap the value and drive a re-render via set().
   let outlineValue: unknown
+  const rollbackStore = createSnapshotStore<unknown>(undefined)
+  const useRollback = bindSnapshotSelector(rollbackStore)
   const openView = vi.fn<(view: string, focus: string) => void>()
   // In-memory scroll memory matching the apply.ts per-session map contract.
   let savedScroll: ReturnType<ChatViewSlotProps['chatScroll']['read']> = null
@@ -517,7 +519,9 @@ function makeHarness(
     ...allowAllAccess,
     useProjection: (key: string) => {
       const inbox = useTestSession(snapshot => snapshot.testInbox)
-      return key === 'inbox' ? inbox : outlineValue
+      if (key === 'inbox') return inbox
+      if (key === 'rollback') return useRollback(value => value)
+      return outlineValue
     },
     useInput: (() => { throw new Error('unused') }),
     inputActions: {
@@ -577,6 +581,7 @@ function makeHarness(
     setConnection: (state: ConnectionState) => { connection.set(state) },
     openFile, openUserFile, loadOlder, loadThrough, openView,
     setOutline: (value: unknown) => { outlineValue = value },
+    setRollback: (value: unknown) => { rollbackStore.set(value) },
     chatScroll, forkAt, toolOwners,
     setPerformanceUsage: (mode: 'compact' | 'detailed') => { performanceUsage.set(mode) },
     setGrouped: (value: ConversationGroupedView<ProcessGroupData> | undefined) => {
@@ -843,6 +848,65 @@ describe('ChatView', () => {
     expect(view.getByText('included')).toBeTruthy()
     expect(view.queryByText('omitted')).toBeNull()
     expect(snapshot.nodes.get(omitted)).toBeDefined()
+  })
+
+  it('hides rolled-back rows across repeated resets while later responses stay visible', () => {
+    const h = makeHarness({
+      nodes: [
+        userInTurn(1, 'old question', 1), assistant(2, 'old answer', 1, 1),
+        userInTurn(3, 'edited question', 2), assistant(4, 'edited answer', 2, 1),
+        userInTurn(5, 'latest question', 3), assistant(6, 'latest answer', 3, 1),
+      ],
+      turnEnds: new Map([[1, 2], [2, 4], [3, 6]]),
+    })
+    // Two edit/resend commits roll back turns 1 and 2; turn 3 is untouched.
+    h.setRollback({ resets: [{ startSeq: 1, endSeq: 2 }, { startSeq: 3, endSeq: 4 }] })
+    h.setOutline([
+      { turn: 1, seq: 1 }, { turn: 2, seq: 3 }, { turn: 3, seq: 5 },
+    ])
+    const view = render(<h.ChatView {...h.props} />)
+    expect(view.queryByText('old question')).toBeNull()
+    expect(view.queryByText('old answer')).toBeNull()
+    expect(view.queryByText('edited question')).toBeNull()
+    expect(view.queryByText('edited answer')).toBeNull()
+    expect(view.getByText('latest question')).toBeTruthy()
+    expect(view.getByText('latest answer')).toBeTruthy()
+    // Rolling back further to turn 3 removes the latest rows too.
+    act(() => {
+      h.setRollback({ resets: [
+        { startSeq: 1, endSeq: 2 }, { startSeq: 3, endSeq: 4 }, { startSeq: 5, endSeq: 6 },
+      ] })
+      h.set({})
+    })
+    expect(view.queryByText('latest question')).toBeNull()
+    expect(view.queryByText('latest answer')).toBeNull()
+  })
+
+  it('hides a rolled-back collapsed Turn group and its Turn navigator mark', () => {
+    const nodes = [
+      userInTurn(1, 'old question', 1), reasoningAssistant(2, 'old analysis', 1, 1),
+      assistant(3, 'old answer', 1, 2),
+      userInTurn(5, 'latest question', 2), assistant(6, 'latest answer', 2, 1),
+    ]
+    const builder = new ChatSnapshotBuilder()
+    const groups = new ConversationGroupStore<ProcessGroupData>()
+    const state = new ProcessState()
+    const snapshot = installGroupedSnapshot(builder, state, groups, chatSnapshotFixture({
+      nodes,
+      turnTimings: new Map([[1, { startTime: 0 }], [2, { startTime: 5_000 }]]),
+      turnEnds: new Map([[1, 4], [2, 6]]),
+    }))
+    const h = makeHarness({}, {}, snapshot)
+    h.setGrouped(groups)
+    h.setRollback({ resets: [{ startSeq: 1, endSeq: 3 }] })
+    h.setOutline([{ turn: 1, seq: 3 }, { turn: 2, seq: 5 }])
+    const view = render(<h.ChatView {...h.props} />)
+    expect(view.queryByText('old question')).toBeNull()
+    expect(view.queryByText('old answer')).toBeNull()
+    expect(view.getByText('latest question')).toBeTruthy()
+    expect(view.getByText('latest answer')).toBeTruthy()
+    // The rolled-back Turn's collapsed group root is not rendered.
+    expect(view.container.querySelector('[data-chat-group-key][data-chat-turn="1"]')).toBeNull()
   })
 
   it('keeps grouped Node instances mounted across presentation modes and group data updates', () => {

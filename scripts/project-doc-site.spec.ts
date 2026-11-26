@@ -9,6 +9,7 @@ import { gfmFromMarkdown } from 'mdast-util-gfm'
 import { gfm } from 'micromark-extension-gfm'
 import type { Nodes } from 'mdast'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { tokenizeDocsSearch } from '../website/.vitepress/search.ts'
 import { cleanDocSiteOutput, docSiteBuildOptions } from '../website/build.ts'
 import { docsPages, landingLink, routeLink, sectionSpec, type DocsPage } from '../website/docs.ts'
 import {
@@ -352,16 +353,26 @@ describe('rewriteMarkdown', () => {
 })
 
 describe('docsPages locale routes', () => {
-  it('redirects both locale roots to their locale-relative quick-start page', () => {
+  it('publishes both learning homepages with locale-relative guide and reference links', () => {
     const homes = docsPages.filter(page => page.sidebar === null)
     expect(homes.map(page => page.route).sort()).toEqual(['en/index.md', 'index.md'])
     for (const page of homes) {
       const source = readFileSync(resolve(repositoryRoot, page.source), 'utf8')
-      const projected = projectedPageContent(source, page)
-      expect(projected).toContain('layout: false')
-      expect(projected).toContain('http-equiv: refresh')
-      expect(projected).toContain('content: 0; url=./guide/quickstart')
-      expect(projected).not.toContain('# DeepSeek Harness')
+      const projected = projectedPageContent(rewriteMarkdown(source, {
+        sourcePath: page.source,
+        locale: page.locale,
+        route: page.route,
+        pages: docsPages,
+        repoRoot: repositoryRoot,
+        repositoryRef: 'abc123',
+      }))
+      expect(projected).toContain('layout: home')
+      expect(projected).toContain('# DeepSeek Harness')
+      expect(projected.match(/class="learning-route"/g)).toHaveLength(3)
+      expect(projected).toContain('(./guide/quickstart.md)')
+      expect(projected).toContain('(./reference/graph-atlas.md)')
+      expect(projected).toContain('(./reference/cli-help.md)')
+      expect(projected).not.toContain('github.com')
     }
   })
 
@@ -507,6 +518,16 @@ describe('docsPages locale routes', () => {
   })
 })
 
+describe('documentation search', () => {
+  it('uses the same terms for Chinese body text and mixed-language queries', () => {
+    const section = tokenizeDocsSearch('在 cordis.yml 中配置会话持久化。')
+    expect(tokenizeDocsSearch('会话持久化 cordis.yml')).toEqual(['会话', '话持', '持久', '久化', 'cordis', 'yml'])
+    expect(section).toEqual(expect.arrayContaining(tokenizeDocsSearch('会话持久化 cordis.yml')))
+    expect(section).not.toContain('配置会话持久化')
+    expect(tokenizeDocsSearch('Agent lifecycle')).toEqual(['Agent', 'lifecycle'])
+  })
+})
+
 describe('sidebar ordering', () => {
   it('places every section a sidebar collection owns', () => {
     for (const page of docsPages) {
@@ -590,58 +611,41 @@ describe('addProjectionFrontmatter', () => {
 })
 
 describe('projectedPageContent', () => {
-  const page = (sidebar: DocsPage['sidebar']): DocsPage => ({
-    locale: 'root',
-    contentLocale: 'zh-CN',
-    source: 'docs/index.zh.md',
-    route: 'index.md',
-    label: 'Home',
-    sidebar,
-    section: 'Home',
-    order: 0,
-  })
-
-  it('omits the source-only body from locale home pages', () => {
+  it('keeps the body of a home page', () => {
     expect(projectedPageContent(
-      '---\nlayout: false\nhead:\n  - - meta\n    - http-equiv: refresh\n      content: 0; url=./guide/quickstart\n---\n\n# Harness\n\n[English](index.md) | 中文\n',
-      page(null),
-    )).toBe('---\nlayout: false\nhead:\n  - - meta\n    - http-equiv: refresh\n      content: 0; url=./guide/quickstart\n---\n')
+      '---\nlayout: home\n---\n\n# Harness\n\n[English](index.md) | 中文\n\nBody.\n',
+    )).toBe('---\nlayout: home\n---\n\n# Harness\n\nBody.\n')
   })
 
   it('keeps the full body for ordinary pages', () => {
     const markdown = '---\ntitle: Guide\n---\n\n# Guide\n'
-    expect(projectedPageContent(markdown, page('zh-guide'))).toBe(markdown)
+    expect(projectedPageContent(markdown)).toBe(markdown)
   })
 
   it('drops the language switcher the navigation bar already offers', () => {
-    expect(projectedPageContent('# Guide\n\nEnglish | [中文](./en/guide)\n\nBody.\n', page('zh-guide')))
+    expect(projectedPageContent('# Guide\n\nEnglish | [中文](./en/guide)\n\nBody.\n'))
       .toBe('# Guide\n\nBody.\n')
-    expect(projectedPageContent('# 指南\n\n[English](./en/guide) | 中文\n\n正文。\n', page('zh-guide')))
+    expect(projectedPageContent('# 指南\n\n[English](./en/guide) | 中文\n\n正文。\n'))
       .toBe('# 指南\n\n正文。\n')
   })
 
   it('drops the repository badge every page links from its footer', () => {
     const badge = '[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square)](https://github.com/deepseek-ai/deepseek-harness)'
-    expect(projectedPageContent(`# Guide\n\nBody.\n\n${badge}\n`, page('zh-guide')))
+    expect(projectedPageContent(`# Guide\n\nBody.\n\n${badge}\n`))
       .toBe('# Guide\n\nBody.\n')
   })
 
   it('keeps a switcher-shaped line that is not the page header', () => {
     // A tutorial showing the convention must still render the example.
     const sample = '# Guide\n\nA\n\nB\n\nC\n\nD\n\nE\n\nEnglish | [中文](./x)\n'
-    expect(projectedPageContent(sample, page('zh-guide'))).toBe(sample)
-  })
-
-  it('rejects a locale home source without frontmatter', () => {
-    expect(() => projectedPageContent('# Harness\n', page(null)))
-      .toThrow('locale home source "docs/index.zh.md" must start with YAML frontmatter')
+    expect(projectedPageContent(sample)).toBe(sample)
   })
 })
 
 describe('rawMarkdownPageContent', () => {
-  it('keeps the home body the rendered site omits and drops the VitePress frontmatter', () => {
+  it('keeps the home body and drops the VitePress frontmatter', () => {
     expect(rawMarkdownPageContent(
-      '---\nlayout: false\nhead:\n  - - meta\n    - http-equiv: refresh\n      content: 0; url=./guide/quickstart\n---\n\n# Harness\n\nEnglish | [中文](./index.md)\n\nBody.\n',
+      '---\nlayout: home\n---\n\n# Harness\n\nEnglish | [中文](./index.md)\n\nBody.\n',
       'docs/user/index.zh.md',
     )).toBe('# Harness\n\nBody.\n')
   })
@@ -774,11 +778,12 @@ describe('raw Markdown projection of the published manifest', () => {
     }
   })
 
-  it('emits home pages with their bodies instead of the frontmatter stub', () => {
+  it('emits home pages with their learning paths', () => {
     for (const route of ['index.md', 'en/index.md']) {
       const home = new TextDecoder().decode(readFileSync(join(mirror, route)))
       expect(home.startsWith('---'), route).toBe(false)
       expect(home, route).toContain('# DeepSeek Harness')
+      expect(home, route).toContain('(./guide/quickstart.md)')
     }
   })
 

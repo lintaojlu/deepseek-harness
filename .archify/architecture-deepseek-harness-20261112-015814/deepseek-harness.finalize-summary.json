@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/candidate.json",
+    "sha256": "1bde4d708daa660483d857f8d62e0b02cb1ce866ee39a4df8190ef1664d23e78",
+    "bytes": 5353
+  },
+  "artifact": {
+    "path": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/deepseek-harness.html",
+    "sha256": "7a4dab4ec3440e3c84d81e1a9a1ab154fa06982e7eb1919571def92dc0e3f1e9",
+    "bytes": 848944
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/deepseek-harness.finalize.json",
+    "summaryReceipt": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/deepseek-harness.finalize-summary.json",
+    "browserCheckReceipt": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/deepseek-harness.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-11T18:15:05.495Z",
+    "source": "network",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 2794,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

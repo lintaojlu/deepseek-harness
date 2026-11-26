@@ -5,6 +5,13 @@ export const NS = 'chat'
 
 /** Simplified Chinese dictionary and key-set source of truth. */
 export const zh = {
+  'message.edit': '编辑消息',
+  'message.edit.notice': '编辑后将从此处重新开始对话，已有产物不会被删除',
+  'message.edit.cancel': '取消',
+  'message.edit.send': '发送',
+  'message.edit.sending': '正在发送…',
+  'message.edit.unavailable': '请先停止当前任务，再编辑消息',
+  'message.edit.failed': '消息重发失败，请重试',
   'message.stepProcess.thinking': '正在分析请求',
   'message.stepProcess.read': '正在读取文件',
   'message.stepProcess.readImage': '正在读取图片',
@@ -215,6 +222,13 @@ export type ChatKey = keyof typeof zh
 
 /** English dictionary, checked against the Chinese key set. */
 export const en = {
+  'message.edit': 'Edit message',
+  'message.edit.notice': 'Editing restarts the conversation from here. Existing artifacts will be kept.',
+  'message.edit.cancel': 'Cancel',
+  'message.edit.send': 'Send',
+  'message.edit.sending': 'Sending…',
+  'message.edit.unavailable': 'Stop the current task before editing a message',
+  'message.edit.failed': 'Could not resend the message. Try again.',
   'message.stepProcess.thinking': 'Analyzing the request',
   'message.stepProcess.read': 'Reading files',
   'message.stepProcess.readImage': 'Reading images',
@@ -422,6 +436,13 @@ export const en = {
 
 /** Japanese copy, checked against the English keys. */
 export const ja = {
+  'message.edit': 'メッセージを編集',
+  'message.edit.notice': 'ここから会話をやり直します。既存の成果物は保持されます。',
+  'message.edit.cancel': 'キャンセル',
+  'message.edit.send': '送信',
+  'message.edit.sending': '送信中…',
+  'message.edit.unavailable': '編集する前に現在のタスクを停止してください',
+  'message.edit.failed': '再送信できませんでした。もう一度お試しください。',
   'message.stepProcess.thinking': 'リクエストを分析中',
   'message.stepProcess.read': 'ファイルを読み取り中',
   'message.stepProcess.readImage': '画像を読み取り中',
@@ -629,6 +650,13 @@ export const ja = {
 
 /** Spanish dictionary, checked against the English keys. */
 export const es = {
+  'message.edit': 'Editar mensaje',
+  'message.edit.notice': 'La conversación se reinicia desde aquí. Se conservan los archivos existentes.',
+  'message.edit.cancel': 'Cancelar',
+  'message.edit.send': 'Enviar',
+  'message.edit.sending': 'Enviando…',
+  'message.edit.unavailable': 'Detén la tarea actual antes de editar un mensaje',
+  'message.edit.failed': 'No se pudo reenviar el mensaje. Inténtalo de nuevo.',
   'message.stepProcess.thinking': 'Analizando la solicitud',
   'message.stepProcess.read': 'Leyendo archivos',
   'message.stepProcess.readImage': 'Leyendo imágenes',
@@ -836,6 +864,13 @@ export const es = {
 
 /** French dictionary, checked against the English keys. */
 export const fr = {
+  'message.edit': 'Modifier le message',
+  'message.edit.notice': 'La conversation reprend ici. Les fichiers existants sont conservés.',
+  'message.edit.cancel': 'Annuler',
+  'message.edit.send': 'Envoyer',
+  'message.edit.sending': 'Envoi…',
+  'message.edit.unavailable': 'Arrêtez la tâche en cours avant de modifier un message',
+  'message.edit.failed': 'Impossible de renvoyer le message. Réessayez.',
   'message.stepProcess.thinking': 'Analyser la demande',
   'message.stepProcess.read': 'Lecture de fichiers',
   'message.stepProcess.readImage': 'Lire des images',
@@ -1043,6 +1078,13 @@ export const fr = {
 
 /** German dictionary, checked against the English keys. */
 export const de = {
+  'message.edit': 'Nachricht bearbeiten',
+  'message.edit.notice': 'Die Unterhaltung beginnt ab hier neu. Vorhandene Dateien bleiben erhalten.',
+  'message.edit.cancel': 'Abbrechen',
+  'message.edit.send': 'Senden',
+  'message.edit.sending': 'Wird gesendet…',
+  'message.edit.unavailable': 'Beende die aktuelle Aufgabe vor dem Bearbeiten',
+  'message.edit.failed': 'Die Nachricht konnte nicht erneut gesendet werden. Versuche es erneut.',
   'message.stepProcess.thinking': 'Analyse der Anfrage',
   'message.stepProcess.read': 'Dateien lesen',
   'message.stepProcess.readImage': 'Bilder lesen',
@@ -1250,6 +1292,13 @@ export const de = {
 
 /** Russian dictionary, checked against the English keys. */
 export const ru = {
+  'message.edit': 'Изменить сообщение',
+  'message.edit.notice': 'Диалог начнётся заново с этого места. Созданные файлы сохранятся.',
+  'message.edit.cancel': 'Отмена',
+  'message.edit.send': 'Отправить',
+  'message.edit.sending': 'Отправка…',
+  'message.edit.unavailable': 'Остановите текущую задачу перед редактированием',
+  'message.edit.failed': 'Не удалось отправить сообщение повторно. Попробуйте ещё раз.',
   'message.stepProcess.thinking': 'Анализ запроса',
   'message.stepProcess.read': 'Чтение файлов',
   'message.stepProcess.readImage': 'Чтение изображений',
@@ -1457,6 +1506,13 @@ export const ru = {
 
 /** Portuguese dictionary, checked against the English keys. */
 export const pt = {
+  'message.edit': 'Editar mensagem',
+  'message.edit.notice': 'A conversa recomeça a partir daqui. Os arquivos existentes serão mantidos.',
+  'message.edit.cancel': 'Cancelar',
+  'message.edit.send': 'Enviar',
+  'message.edit.sending': 'Enviando…',
+  'message.edit.unavailable': 'Pare a tarefa atual antes de editar uma mensagem',
+  'message.edit.failed': 'Não foi possível reenviar a mensagem. Tente novamente.',
   'message.stepProcess.thinking': 'Analisando a solicitação',
   'message.stepProcess.read': 'Lendo arquivos',
   'message.stepProcess.readImage': 'Lendo imagens',

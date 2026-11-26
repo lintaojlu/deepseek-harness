@@ -405,6 +405,8 @@ const reference = [
     ['docs/agent-lifecycle.md', 'reference/agent-lifecycle.md', 'Agent 生命周期', 'Agent lifecycle', 3],
     ['docs/tool-execution-pipeline.md', 'reference/tool-execution-pipeline.md', 'Tool 执行', 'Tool execution', 4],
     ['docs/api-gateway.md', 'reference/api-gateway.md', 'API Gateway', 'API Gateway', 5],
+    ['docs/graph-atlas.md', 'reference/graph-atlas.md', '文档图索引', 'Documentation graph index', 6],
+    ['docs/glossary.md', 'reference/glossary.md', '术语表', 'Glossary', 7],
   ] as const).map(([source, route, rootLabel, enLabel, order]): PairedPage => ({
     source,
     route,
@@ -418,6 +420,9 @@ const reference = [
     ['docs/tool-catalog.md', 'reference/tool-catalog.md', 'Tool Schema', 'Tool schemas'],
     ['docs/persistence-catalog.md', 'reference/persistence-catalog.md', '持久化事件', 'Persistence events', 'deep'],
     ['docs/experimental-persistence-catalog.md', 'reference/experimental-persistence-catalog.md', '实验性持久化记录', 'Experimental persistence'],
+    ['docs/cli-help.md', 'reference/cli-help.md', 'CLI 帮助', 'CLI help'],
+    ['docs/module-graph.md', 'reference/module-graph.md', '模块依赖图', 'Module dependency graph'],
+    ['docs/event-producer-consumer.md', 'reference/event-producer-consumer.md', '事件生产方与消费方', 'Event producers and consumers'],
   ] as const).map(([source, route, rootLabel, enLabel, outline], order): PairedPage => ({
     source,
     route,
@@ -466,6 +471,14 @@ const reference = [
     section: { root: '开发手册', en: 'Cookbook' },
     order,
   }))),
+  ...pairedPages([{
+    source: 'docs/development.md',
+    route: 'reference/development.md',
+    label: { root: '开发指南', en: 'Development guide' },
+    sidebar: { root: 'zh-reference', en: 'en-reference' },
+    section: { root: '开发手册', en: 'Cookbook' },
+    order: -1,
+  }]),
 ]
 
 /**

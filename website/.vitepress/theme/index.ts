@@ -11,6 +11,7 @@ import './media-viewer.css'
 import './code-group.css'
 import './page-markdown-actions.css'
 import './table-filter.css'
+import './learning-home.css'
 
 export default {
   extends: DefaultTheme,

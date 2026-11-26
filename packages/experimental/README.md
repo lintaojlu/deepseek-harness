@@ -97,6 +97,10 @@ Promotion requires a named product role, documented public behavior and limitati
 | [`forge-session`](forge-session/README.md) | Binds change requests to the Sessions that created, pushed, or tracked them | `ctx.forgeSession` |
 | [`client-ui-forge`](client-ui-forge/README.md) | GUI panel for a Session's Git checkout, worktrees, and bound pull requests | `ctx.forgePanel` |
 | [`forge-bundle`](forge-bundle/README.md) | Default-disabled pull request and worktree panel composition | — |
+| [`client-ui-whiteboard`](client-ui-whiteboard/README.md) | Sidebar Excalidraw canvas that saves locally or sends a drawing and prompt to a session | — |
+| [`nil-plugin-bundle`](nil-plugin-bundle/README.md) | Experimental profile bundle for the local task board, whiteboard, CEOS mark, and edit and resend | — |
+| [`auto-todo`](auto-todo/README.md) | Dated tasks board with tags, a focus timer, and stats kept in this browser | — |
+| [`client-ui-ceos`](client-ui-ceos/README.md) | CEOS name in the sidebar, and the CEOS mark on the new-session page and browser tab | — |
 
 -----
 

@@ -79,10 +79,32 @@ export function hasDelegationModelRequest(request: DelegationModelRequest): bool
     || request.reasoning_effort !== undefined
 }
 
-/** Reject an empty model-facing route value at the tool JSON boundary. */
-function assertNonEmpty(value: string | undefined, field: keyof DelegationModelRequest): void {
-  if (value !== undefined && value.length === 0) {
-    throw new Error(`child LLM \`${field}\` must be non-empty`)
+/**
+ * Treat an empty optional id as omission.
+ * Models often emit `""` for unused optional string fields.
+ * @param value - Model-facing id, when the field was present.
+ * @returns The id, or `undefined` when it was omitted or empty.
+ */
+export function emptyToOmitted(value: string | undefined): string | undefined {
+  return value === '' ? undefined : value
+}
+
+/**
+ * Drop empty child LLM fields so they follow the same path as omission.
+ * @param request - Model-facing route fields from the tool call.
+ * @returns The request with empty strings removed.
+ */
+export function normalizeDelegationModelRequest(request: DelegationModelRequest): DelegationModelRequest {
+  const provider = emptyToOmitted(request.provider)
+  const model = emptyToOmitted(request.model)
+  const reasoning_effort = emptyToOmitted(request.reasoning_effort)
+  if (provider === request.provider && model === request.model && reasoning_effort === request.reasoning_effort) {
+    return request
+  }
+  return {
+    ...(provider === undefined ? {} : { provider }),
+    ...(model === undefined ? {} : { model }),
+    ...(reasoning_effort === undefined ? {} : { reasoning_effort }),
   }
 }
 
@@ -90,6 +112,7 @@ function assertNonEmpty(value: string | undefined, field: keyof DelegationModelR
  * Validate explicit selection against the Session policy and merge it over child defaults.
  * Explicit selection requires both provider and model; an omitted effort then
  * uses the selected model's default, even when the route is unchanged.
+ * An empty string is an omission.
  * @param configured - Tool-instance child defaults.
  * @param request - Model-facing route override.
  * @param enabled - Whether this tool instance permits model-facing selection.
@@ -104,26 +127,24 @@ export function requestedAgentOptions(
   policy: ModelSelectionPolicy | undefined,
   parentOptions: AgentOptions,
 ): AgentOptions | undefined {
-  if (!hasDelegationModelRequest(request)) return configured
+  const selection = normalizeDelegationModelRequest(request)
+  if (!hasDelegationModelRequest(selection)) return configured
   if (!enabled) {
     throw new Error('child model selection is disabled for this tool instance')
   }
-  assertNonEmpty(request.provider, 'provider')
-  assertNonEmpty(request.model, 'model')
-  assertNonEmpty(request.reasoning_effort, 'reasoning_effort')
-  if (request.provider === undefined || request.model === undefined) {
-    throw new Error(request.reasoning_effort === undefined
+  if (selection.provider === undefined || selection.model === undefined) {
+    throw new Error(selection.reasoning_effort === undefined
       ? 'child LLM `provider` and `model` must be supplied together'
       : 'child LLM `reasoning_effort` requires both `provider` and `model`; supply both or omit all three fields')
   }
 
-  assertAllowedModelSelection(policy, parentOptions, { provider: request.provider, model: request.model })
+  assertAllowedModelSelection(policy, parentOptions, { provider: selection.provider, model: selection.model })
   return {
     ...configured,
-    provider: request.provider,
-    model: request.model,
+    provider: selection.provider,
+    model: selection.model,
     // Explicit undefined also clears compatible parent effort during child-option merging.
-    reasoningEffort: request.reasoning_effort === undefined ? undefined : ReasoningEffortId(request.reasoning_effort),
+    reasoningEffort: selection.reasoning_effort === undefined ? undefined : ReasoningEffortId(selection.reasoning_effort),
   }
 }
 

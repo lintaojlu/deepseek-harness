@@ -1,0 +1,94 @@
+.root {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.spacer { flex: 1 1 8px; }
+
+.theme {
+  display: flex;
+  gap: 4px;
+}
+
+.file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}
+
+.status {
+  flex: none;
+  margin: 0;
+  padding: 4px 8px 0;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.canvas {
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
+}
+
+.canvas > div { height: 100%; }
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field span { color: var(--dsw-alias-label-secondary); }
+
+.select,
+.prompt {
+  box-sizing: border-box;
+  width: 100%;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.select {
+  height: 32px;
+  border-radius: var(--dsw-radius-md);
+  padding: 0 8px;
+}
+
+.prompt {
+  min-height: 96px;
+  border-radius: var(--dsw-radius-lg);
+  padding: 8px;
+  resize: vertical;
+}
+
+.empty { margin: 0; color: var(--dsw-alias-label-secondary); }

@@ -15,6 +15,7 @@ import type { SessionObservation } from '@deepseek-ai/dsh-session-query'
 import { Remote, RemoteError, TypertRemoteService, principalOf, type TypertResourceResolveInput } from '@deepseek-ai/dsh-typert-protocol'
 import { canonicalClientTimeZone } from '@deepseek-ai/dsh-util-time'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
+import type {} from '@deepseek-ai/dsh-rollback'
 import type {} from '@deepseek-ai/dsh-api-remote-access'
 import {
   ApiSessionAgentController,
@@ -52,6 +53,8 @@ import type {
   SessionOpenWorkspacePathValue,
   SessionEventsPage, SessionPageRequest, SessionEventFrame, SessionObserveEventRequest,
   SessionProjectionFrame, SessionStateRequest, SessionState, SessionWaitRequest, SessionWaitValue,
+  SessionEditPromptRequest,
+  SessionEditPromptValue,
   SessionPromptRequest,
   SessionPromptValue,
   SessionRenameRequest,
@@ -456,6 +459,29 @@ export class SessionController extends TypertRemoteService {
       }
     }
     return this.commands.fork(request)
+  }
+
+  /**
+   * Restart from an edited historical prompt without creating another Session.
+   * @param request - Session, current human prompt, and revised content.
+   * @param signal - cancellation before the edit commits.
+   * @returns the committed interval hidden from active Chat and model input.
+   */
+  @Remote('editPrompt')
+  async editPrompt(request: SessionEditPromptRequest, signal: AbortSignal): Promise<SessionEditPromptValue> {
+    signal.throwIfAborted()
+    const rollback = this.ctx.get('rollback')
+    if (rollback === undefined) throw new RemoteError('session/rollback-not-mounted', 'Message editing is unavailable', {})
+    const found = await this.agents.resolveAgent(request.sessionId)
+    if ('error' in found) throw found.error
+    try {
+      return await rollback.editPrompt(found.agent, request, signal)
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'RollbackError' && 'code' in error && typeof error.code === 'string') {
+        throw new RemoteError('session/rollback-failed', error.message, { reason: error.code, committed: error.code === 'committed' })
+      }
+      throw error
+    }
   }
 
   /**

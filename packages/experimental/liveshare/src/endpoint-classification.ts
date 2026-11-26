@@ -82,6 +82,7 @@ export const VIEWER_ENDPOINT_CLASSES = {
   // No reader role names these, so the conservative class is owner-only. A share's method policy
   // decides whether one installed plugin's method reaches its viewers; this table only decides what
   // the core share roles grant.
+  'session/editPrompt': 'owner-only', // revising history requires the owning user's authority
   'account/ackBonusNotified': 'owner-only', // owner account and sign-in; the served page never reads it
   'account/cancelSignIn': 'owner-only', // owner account and sign-in; the served page never reads it
   'account/getBalance': 'owner-only', // owner account and sign-in; the served page never reads it

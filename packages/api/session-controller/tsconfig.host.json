@@ -29,6 +29,7 @@
     "src/continuation.ts"
   ],
   "references": [
+    { "path": "../../compaction/rollback" },
     {
       "path": "../gateway/tsconfig.host.json"
     },

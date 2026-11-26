@@ -1,0 +1,328 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram id="overview" name="系统总览">
+    <mxGraphModel dx="1600" dy="1120" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1600" pageHeight="1120" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="overview-title" value="DeepSeek Harness · 系统总览" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=30;" vertex="1" parent="1">
+          <mxGeometry x="60" y="25" width="1480" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="overview-subtitle" value="按职责聚合组件；框和连线表示逻辑关系，具体启用能力由 Profile 与插件配置决定。" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="1480" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="web-client" value="&lt;b&gt;浏览器客户端&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;Web shell + Client plugins&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="web-client" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="60" y="150" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop" value="&lt;b&gt;Electron 桌面应用&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;内置 dsh runtime · 本地 Web UI&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="desktop" data-source-path="docs/architecture.md" data-source-line="49">
+          <mxGeometry x="600" y="150" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="automation" value="&lt;b&gt;自动化调用方&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;CLI 用户 · TypeScript / Python SDK · ACP&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="automation" data-source-path="docs/architecture.md" data-source-line="41">
+          <mxGeometry x="1140" y="150" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="web-host" value="&lt;b&gt;Web Host / API&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;RPC · Session follow · 实时流&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="web-host" data-source-path="packages/bundle/web-app/cordis.patch.yml" data-source-line="32">
+          <mxGeometry x="60" y="320" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-host" value="&lt;b&gt;Desktop Host&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;共享 CLI runner 启动完整 Web 应用&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="desktop-host" data-source-path="docs/architecture.md" data-source-line="53">
+          <mxGeometry x="600" y="320" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="surface" value="&lt;b&gt;其他 Profile 入口&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;headless runner / SDK JSON-RPC / ACP server&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="surface" data-source-path="docs/architecture.md" data-source-line="23">
+          <mxGeometry x="1140" y="320" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cordis" value="Cordis Context · 服务注入 / 类型化事件 / 可撤销 effects；Agent Loop 也是插件" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;swimlane;startSize=40;horizontal=1;container=1;collapsible=0;pointerEvents=0;align=left;verticalAlign=top;spacingLeft=20;" vertex="1" parent="1" data-model-id="cordis" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="60" y="490" width="1480" height="540" as="geometry" />
+        </mxCell>
+        <mxCell id="prompt" value="&lt;b&gt;Prompt / Tool schema assembly&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;system-prompt · preset / scope&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="prompt" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="30" y="80" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="loop" value="&lt;b&gt;Agent registry + Agent Loop&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;输入队列 · turn / step · 取消与续行&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="loop" data-source-path="docs/architecture.md" data-source-line="81">
+          <mxGeometry x="540" y="80" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="llm" value="&lt;b&gt;LLM 服务与适配器&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;prepareCall · 不可变请求 · 流式响应&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="llm" data-source-path="docs/architecture.md" data-source-line="93">
+          <mxGeometry x="1050" y="80" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="tools" value="&lt;b&gt;Tool registry / 执行流水线&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;FS · Shell · Web · MCP · Subagent · Jobs&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="tools" data-source-path="docs/architecture.md" data-source-line="101">
+          <mxGeometry x="30" y="260" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="session" value="&lt;b&gt;Session 事件日志与投影&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;追加事件；模型历史从日志推导&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="session" data-source-path="docs/architecture.md" data-source-line="124">
+          <mxGeometry x="540" y="260" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="models" value="&lt;b&gt;外部模型 API&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;DeepSeek 或配置的其他模型提供方&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;dashed=1;" vertex="1" parent="cordis" data-model-id="models" data-source-path="docs/architecture.md" data-source-line="150">
+          <mxGeometry x="1050" y="260" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="policy" value="&lt;b&gt;能力 Provider 与执行策略&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;FS / Subprocess / Sandbox / 人工审批&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="policy" data-source-path="docs/architecture.md" data-source-line="136">
+          <mxGeometry x="30" y="420" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="persistence" value="&lt;b&gt;Session persistence&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;JSONL 代际文件 · 恢复 / Fork / 导出&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;" vertex="1" parent="cordis" data-model-id="persistence" data-source-path="docs/architecture.md" data-source-line="128">
+          <mxGeometry x="540" y="420" width="400" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="web-client-entry" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="web-client" target="web-host">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-entry" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="desktop" target="desktop-host">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="automation-entry" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="automation" target="surface">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="web-to-agent" value="Agent 操作" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.2;entryY=0;" edge="1" parent="1" source="web-host" target="loop">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="450" />
+              <mxPoint x="680" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="desktop-to-web" value="承载 Web" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="desktop-host" target="web-host">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="surface-to-agent" value="Agent 操作" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.8;entryY=0;" edge="1" parent="1" source="surface" target="loop">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1340" y="450" />
+              <mxPoint x="920" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="prompt-to-loop" value="组装" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="prompt" target="loop">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="loop-to-llm" value="请求 / 流" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="loop" target="llm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="loop-to-tools" value="工具批次" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.2;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="loop" target="tools">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="710" />
+              <mxPoint x="290" y="710" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="loop-to-log" value="提交事件" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.65;exitY=1;entryX=0.65;entryY=0;" edge="1" parent="1" source="loop" target="session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="llm-api" value="模型调用" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="llm" target="models">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-provider" value="策略检查 / 执行" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="tools" target="policy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="log-store" value="持久化" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="session" target="persistence">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-service" value="&lt;b&gt;运行组件&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-service" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="60" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-gateway" value="&lt;b&gt;入口 / 传输&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-gateway" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="310" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-config" value="&lt;b&gt;配置 / 上下文&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-config" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="560" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-data" value="&lt;b&gt;会话 / 存储&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-data" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="810" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-policy" value="&lt;b&gt;策略&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-policy" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="1060" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-external" value="&lt;b&gt;外部系统&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-external" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="1310" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="composition" name="启动与插件装配">
+    <mxGraphModel dx="1600" dy="1120" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1600" pageHeight="1120" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="composition-title" value="DeepSeek Harness · 启动与插件装配" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=30;" vertex="1" parent="1">
+          <mxGeometry x="60" y="25" width="1480" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="composition-subtitle" value="配置层按顺序应用；同一行后写覆盖，config 整体替换。插件激活取决于所需服务是否可用。" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="1480" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="launch" value="&lt;b&gt;统一启动入口：dsh&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;dsh --profile &amp;lt;name&amp;gt; / dsh &amp;lt;name&amp;gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="launch" data-source-path="docs/architecture.md" data-source-line="41">
+          <mxGeometry x="60" y="160" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="profiles" value="&lt;b&gt;选择命名 Profile&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;web / headless / sdk / sdk-minimal / acp&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="profiles" data-source-path="docs/architecture.md" data-source-line="17">
+          <mxGeometry x="600" y="160" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="bundles" value="&lt;b&gt;① 有序 Bundle patches&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;空插件列表 → 按 Profile 声明依次应用&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="bundles" data-source-path="docs/architecture.md" data-source-line="25">
+          <mxGeometry x="1140" y="160" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cli-patch" value="&lt;b&gt;④ --patch overlays&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;本次调用覆盖层 · 最高优先级&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="cli-patch" data-source-path="docs/architecture.md" data-source-line="25">
+          <mxGeometry x="60" y="390" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="home-patch" value="&lt;b&gt;③ Home patch&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;Harness home 的覆盖层&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="home-patch" data-source-path="docs/architecture.md" data-source-line="25">
+          <mxGeometry x="600" y="390" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="profile-patch" value="&lt;b&gt;② Profile cordis.patch.yml&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;Profile 自身的配置覆盖层&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="profile-patch" data-source-path="docs/architecture.md" data-source-line="25">
+          <mxGeometry x="1140" y="390" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="loader" value="&lt;b&gt;Cordis Loader&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;读取插件条目 · 注入服务 · 激活与卸载&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="loader" data-source-path="docs/architecture.md" data-source-line="9">
+          <mxGeometry x="60" y="650" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="tree" value="&lt;b&gt;运行中的插件树&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;服务 + typed events + ctx.effect() / ctx.on()&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="tree" data-source-path="docs/architecture.md" data-source-line="9">
+          <mxGeometry x="600" y="650" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="preset" value="&lt;b&gt;Agent Preset / Scope&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;按 Agent 组合工具与服务；服务行可用 isolate&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="preset" data-source-path="docs/architecture.md" data-source-line="152">
+          <mxGeometry x="1140" y="650" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="launch-profiles" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="launch" target="profiles">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="profiles-bundles" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="profiles" target="bundles">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="home-patch-cli-patch" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="home-patch" target="cli-patch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="profile-patch-home-patch" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="profile-patch" target="home-patch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="loader-tree" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="loader" target="tree">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tree-preset" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="tree" target="preset">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bundles-profile" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="bundles" target="profile-patch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="overlays-loader" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cli-patch" target="loader">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="base-backed" value="&lt;b&gt;共享 Base 的 Profile&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;dsh-base + web-app / headless / sdk-app / acp-app&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="base-backed" data-source-path="docs/architecture.md" data-source-line="23">
+          <mxGeometry x="60" y="850" width="700" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="minimal" value="&lt;b&gt;sdk-minimal 的独立装配&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;自身 Bundle 包含完整显式插件树；不应用 dsh-base&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="minimal" data-source-path="packages/bundle/sdk-minimal/cordis.patch.yml" data-source-line="1">
+          <mxGeometry x="840" y="850" width="700" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="desktop-note" value="Desktop：保留的 desktop Profile 使用内置 runtime，经共享 CLI Profile runner 启动 Web 应用。" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="60" y="995" width="1480" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-service" value="&lt;b&gt;运行组件&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-service" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="60" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-gateway" value="&lt;b&gt;入口 / 传输&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-gateway" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="310" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-config" value="&lt;b&gt;配置 / 上下文&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-config" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="560" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-data" value="&lt;b&gt;会话 / 存储&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-data" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="810" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-policy" value="&lt;b&gt;策略&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-policy" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="1060" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-external" value="&lt;b&gt;外部系统&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-external" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="1310" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="turn-flow" name="Agent 单轮执行">
+    <mxGraphModel dx="1600" dy="1120" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1600" pageHeight="1120" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="turn-flow-title" value="DeepSeek Harness · Agent 单轮执行" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=30;" vertex="1" parent="1">
+          <mxGeometry x="60" y="25" width="1480" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="turn-flow-subtitle" value="一个 turn 含零个或多个 step；每个 step 包含一次模型请求，以及模型发出的工具调用。" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;text;strokeColor=none;fillColor=none;align=left;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="1480" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="inbox" value="&lt;b&gt;输入队列 / turn 开始&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;领取输入；快照 Session 模型选择&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="inbox" data-source-path="docs/architecture.md" data-source-line="83">
+          <mxGeometry x="60" y="160" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="assembly" value="&lt;b&gt;组装 prompt 与工具 schema&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;agent/pre-step 接受、改写或拒绝输入&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="assembly" data-source-path="docs/architecture.md" data-source-line="87">
+          <mxGeometry x="600" y="160" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="prepare" value="&lt;b&gt;prepareCall 与请求冻结&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;绑定 adapter；记录输入 / 请求上下文；从日志推导历史&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="prepare" data-source-path="docs/architecture.md" data-source-line="93">
+          <mxGeometry x="1140" y="160" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-exec" value="&lt;b&gt;工具执行流水线&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;pre-execute → execute → post-execute&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="tool-exec" data-source-path="docs/architecture.md" data-source-line="101">
+          <mxGeometry x="60" y="430" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="settle" value="&lt;b&gt;持久化模型响应&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;assistant/message 或 assistant/attempt&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="settle" data-source-path="docs/architecture.md" data-source-line="100">
+          <mxGeometry x="600" y="430" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="stream" value="&lt;b&gt;流式模型调用&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;llm/stream → agent/assistant-stream&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="stream" data-source-path="docs/architecture.md" data-source-line="98">
+          <mxGeometry x="1140" y="430" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-result" value="&lt;b&gt;写入工具结果 / step 结束&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;tool/call · tool/result · step/end&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="tool-result" data-source-path="docs/architecture.md" data-source-line="101">
+          <mxGeometry x="60" y="700" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="continue" value="&lt;b&gt;是否继续请求&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;工具仍需后续请求，或有新输入 → 下一 step&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="continue" data-source-path="docs/architecture.md" data-source-line="103">
+          <mxGeometry x="600" y="700" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="turn-end" value="&lt;b&gt;turn 结束&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;agent/turn-stopping → turn/end&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="turn-end" data-source-path="docs/architecture.md" data-source-line="104">
+          <mxGeometry x="1140" y="700" width="400" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="input-assembly" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="inbox" target="assembly">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assembly-prepare" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="assembly" target="prepare">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prepare-stream" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="prepare" target="stream">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stream-settle" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="stream" target="settle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="settle-exec" value="有工具调用" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="settle" target="tool-exec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="exec-results" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="tool-exec" target="tool-result">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="results-next" value="" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="tool-result" target="continue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="next-end" value="否" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="continue" target="turn-end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="next-step" value="是：下一 step" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.5;exitY=1;entryX=0.5;entryY=1;dashed=1;" edge="1" parent="1" source="continue" target="assembly">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="870" />
+              <mxPoint x="520" y="870" />
+              <mxPoint x="520" y="330" />
+              <mxPoint x="800" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="no-tool-next" value="无工具调用" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;fontSize=14;labelBackgroundColor=#ffffff;strokeWidth=1.5;strokeColor=#65758b;exitX=0.8;exitY=1;entryX=0.8;entryY=0;" edge="1" parent="1" source="settle" target="continue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="durable" value="&lt;b&gt;持久化事实&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;SessionEvent → 模型历史、恢复、Fork、导出与投影&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="durable" data-source-path="docs/architecture.md" data-source-line="124">
+          <mxGeometry x="60" y="920" width="700" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="transient" value="&lt;b&gt;实时增量&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;assistant-stream chunk 为进程内临时帧；Web follow 负责远端消费&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;" vertex="1" parent="1" data-model-id="transient" data-source-path="docs/architecture.md" data-source-line="108">
+          <mxGeometry x="840" y="920" width="700" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-service" value="&lt;b&gt;运行组件&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-service" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="60" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-gateway" value="&lt;b&gt;入口 / 传输&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-gateway" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="310" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-config" value="&lt;b&gt;配置 / 上下文&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-config" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="560" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-data" value="&lt;b&gt;会话 / 存储&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-data" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="810" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-policy" value="&lt;b&gt;策略&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-policy" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="1060" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-external" value="&lt;b&gt;外部系统&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;&lt;/font&gt;" style="whiteSpace=wrap;html=1;convertToSvg=1;fontFamily=Helvetica;fontSize=18;fontColor=#233247;spacing=12;rounded=1;arcSize=10;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;fontSize=13;spacing=2;" vertex="1" parent="1" data-model-id="legend-external" data-source-path="docs/architecture.md" data-source-line="55">
+          <mxGeometry x="1310" y="1060" width="230" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

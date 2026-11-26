@@ -130,7 +130,13 @@ const ProcessGroupHeader = memo(function ProcessGroupHeader({ groupKey, useChatG
 })
 
 /** Render a process group with local disclosure and the existing outer-Turn visibility. */
-export const ChatGroupSeat = memo(function ChatGroupSeat({ groupKey, useChatGroup, useGroupHeaderAction, ...props }: ChatGroupSeatProps) {
+export const ChatGroupSeat = memo(function ChatGroupSeat({
+  groupKey,
+  useChatGroup,
+  useGroupHeaderAction,
+  rolledBackTurns,
+  ...props
+}: ChatGroupSeatProps) {
   const members = useChatGroup(groupKey, group => group?.members)
   const turn = useChatGroup(groupKey, group => group?.data.turn)
   const closed = useChatGroup(groupKey, group => group?.data.closed)
@@ -183,6 +189,7 @@ export const ChatGroupSeat = memo(function ChatGroupSeat({ groupKey, useChatGrou
   const shownCap = !grouped ? false : open ? true : undefined
   const [closingCap, setClosingCap] = useState(shownCap ?? true)
   if (shownCap !== undefined && shownCap !== closingCap) setClosingCap(shownCap)
+  if (turn !== undefined && rolledBackTurns.has(turn)) return null
   if (members === undefined) return null
   const capped = grouped && (!deferCompletedTurns || (shownCap ?? closingCap))
   const classes = [css.body, !capped ? css.expandedBody : '',
@@ -200,7 +207,7 @@ export const ChatGroupSeat = memo(function ChatGroupSeat({ groupKey, useChatGrou
         data-scroll-up={edges.canScrollUp || undefined} data-scroll-down={edges.canScrollDown || undefined}
         {...events}>
         <div ref={contentRef} className={css.content} data-step-process-content data-chat-flow="">
-          <GroupMembers {...props} members={members} />
+          <GroupMembers {...props} rolledBackTurns={rolledBackTurns} members={members} />
         </div>
       </div>
     </div>

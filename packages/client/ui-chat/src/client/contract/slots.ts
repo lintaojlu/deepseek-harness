@@ -373,6 +373,8 @@ export interface ChatFlowOwnerProps extends Pick<ChatNodeOwnerProps,
   readonly pendingInputs: readonly (PendingSubmission | InboxState['next-step'][number])[]
   readonly lastInputTurn: number | undefined
   readonly deferCollapse: boolean
+  /** Turn numbers whose whole Turn was rolled back; their rail marks and groups must not render. */
+  readonly rolledBackTurns: ReadonlySet<number>
 }
 
 /** Full props of the Chat-owned flow renderer. */

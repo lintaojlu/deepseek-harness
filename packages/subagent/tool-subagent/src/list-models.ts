@@ -8,6 +8,7 @@ import { parentAgentOptionsForDelegation } from '@deepseek-ai/dsh-subagent'
 import type { ToolRunContext } from '@deepseek-ai/dsh-tools'
 import type { ProjectionHandle } from '@deepseek-ai/dsh-session-projection'
 import type { AllowedModelRoute, ModelSelectionPolicy } from './model-selection.ts'
+import { emptyToOmitted } from './model-selection.ts'
 import { subagentModelSelectionPolicy } from './model-selection-state.ts'
 
 interface ListSubagentModelsRequest {
@@ -59,24 +60,25 @@ async function listSubagentModels(
   if (llm === undefined) {
     throw new Error('cannot discover child LLM routes because the `llm` service is unavailable')
   }
-  if (request.model !== undefined && request.provider === undefined) {
+  const providerId = emptyToOmitted(request.provider)
+  const modelId = emptyToOmitted(request.model)
+  if (modelId !== undefined && providerId === undefined) {
     throw new Error('`model` requires `provider`')
   }
-  if (request.provider === undefined) {
+  if (providerId === undefined) {
     const providers = llm.listProviders()
       .filter(provider => policy.routes.some(route => route.provider === provider.id))
     return providers.length === 0
       ? '(no LLM providers)'
       : providers.map(provider => `${provider.id} — ${provider.name}`).join('\n')
   }
-  if (request.provider.length === 0) throw new Error('`provider` must be non-empty')
-  const allowedRoutes = policy.routes.filter(route => route.provider === request.provider)
+  const allowedRoutes = policy.routes.filter(route => route.provider === providerId)
   const [firstRoute] = allowedRoutes
   if (firstRoute === undefined) {
-    throw new Error(`LLM provider "${request.provider}" is not allowed for this Session`)
+    throw new Error(`LLM provider "${providerId}" is not allowed for this Session`)
   }
-  const provider = registeredProvider(llm, policy, request.provider)
-  if (request.model === undefined) {
+  const provider = registeredProvider(llm, policy, providerId)
+  if (modelId === undefined) {
     const models = selectionEnabled
       ? (await llm.listModels(provider.id)).filter(model => allowedRoutes.some(route => route.model === model.id))
       : [await llm.resolveModelInfo(provider.id, firstRoute.model, signal)]
@@ -85,11 +87,10 @@ async function listSubagentModels(
       ? `(no advertised models for ${provider.id})`
       : models.map(model => modelLine(provider.id, model)).join('\n')
   }
-  if (request.model.length === 0) throw new Error('`model` must be non-empty')
-  if (!allowedRoutes.some(route => route.model === request.model)) {
-    throw new Error(`child LLM route "${provider.id}/${request.model}" is not allowed for this Session`)
+  if (!allowedRoutes.some(route => route.model === modelId)) {
+    throw new Error(`child LLM route "${provider.id}/${modelId}" is not allowed for this Session`)
   }
-  const model = await llm.resolveModelInfo(provider.id, request.model, signal)
+  const model = await llm.resolveModelInfo(provider.id, modelId, signal)
   const efforts = model.reasoning?.efforts.map(effort => (
     `${effort.id}${model.reasoning?.defaultEffort === effort.id ? ' (default)' : ''} — ${effort.name}`
     + (effort.description === undefined ? '' : `: ${effort.description}`)

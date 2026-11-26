@@ -377,7 +377,6 @@ describe('list_subagent_models', () => {
 
   it.each([
     { args: { model: 'fast' }, expected: '`model` requires `provider`' },
-    { args: { provider: '' }, expected: '`provider` must be non-empty' },
     { args: { provider: 'missing' }, expected: 'is not allowed for this Session' },
   ])('rejects incomplete or unavailable provider requests', async ({ args, expected }) => {
     const ctx = await setupListTool()
@@ -386,12 +385,15 @@ describe('list_subagent_models', () => {
     expect(text(result)).toContain(expected)
   })
 
-  it('rejects an empty exact model after resolving the provider', async () => {
+  it('treats empty discovery ids as omitted', async () => {
     const ctx = await setupListTool()
     ctx.llm.registerAdapter(['alpha'], new CatalogAdapter())
-    const result = await call(ctx, { provider: 'alpha', model: '' })
-    expect(result.isError).toBe(true)
-    expect(text(result)).toContain('`model` must be non-empty')
+    const providers = await call(ctx, { provider: '' })
+    expect(providers.isError).toBe(false)
+    expect(text(providers)).toBe('alpha — ALPHA API')
+    const models = await call(ctx, { provider: 'alpha', model: '' })
+    expect(models.isError).toBe(false)
+    expect(text(models)).toBe('alpha/fast — Fast: Focused work.\nalpha/plain — Plain')
   })
 
   it('reports registered alternatives for an unavailable provider', async () => {

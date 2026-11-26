@@ -901,7 +901,7 @@ describe('web e2e: plugin manager', () => {
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  it('enables both default-hidden shipped bundles by name without adding a profile dependency', async () => {
+  it('enables default-hidden shipped bundles by name without adding a profile dependency', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-manager-bundled-enable'))
     const profileDir = join(scaffold.harnessHome, 'profiles', 'scaffold')
     const before = readProfileManifest('dsh', profileDir).dependencies

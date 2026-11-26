@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PendingSubmission } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { PropsRenderFactories, PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
@@ -11,6 +11,8 @@ import type { ModelRetryNode, TurnErrorNode, UserMessageNode } from '../contract
 import { CompactionItem } from './CompactionItem.tsx'
 import { ContextInjectionRow } from './ContextInjectionRow.tsx'
 import { MessageIconActions } from './MessageIconActions.tsx'
+import { PromptEditor } from './PromptEditor.tsx'
+import type { SessionSeq } from '@deepseek-ai/dsh-session/types'
 import css from './MessageItem.module.css'
 
 const EMPTY_TEXT_FACTS: Readonly<Partial<UserTextFacts>> = {}
@@ -329,13 +331,36 @@ export function PendingSubmissionBubble({ submission, loadImage, renderFactorySl
  * declared by the `user` registration alone, so a steering row renders the same
  * bubble without asking for it.
  */
+/** Session-bound edit operation supplied by the user renderer registration. */
+export interface UserMessageEditInjected {
+  /** Replace the selected prompt and restart its response in the same session. */
+  editPrompt?: (targetSeq: SessionSeq, content: UserMessageNode['content']) => Promise<void>
+}
+
 export const UserMessageNodeView = memo(function UserMessageNodeView({
-  node, renderFactorySlot, loadImage, renderSlotChain, t,
-}: ChatNodeViewProps<'user' | 'steering'> & {
+  node, renderFactorySlot, loadImage, renderSlotChain, t, useSession, useProjection, useAccess, editPrompt,
+}: ChatNodeViewProps<'user' | 'steering'> & UserMessageEditInjected & {
   /** Bound by the `user` keyed registration, the only entry that declares the seat. */
   renderSlotChain: PropsRenderSlots<'conversation.chat.user.before'>['renderSlotChain']
 }) {
   const data = node.data
+  const [editing, setEditing] = useState(false)
+  const restoreEditFocus = useRef(false)
+  const cancelEdit = (): void => { restoreEditFocus.current = true; setEditing(false) }
+  const running = useSession(snapshot => snapshot.running)
+  const rollback = useProjection('rollback')
+  const allowed = useAccess('session/editPrompt')
+  const human = typeof data.source === 'object' && data.source !== null
+    && 'kind' in data.source && data.source.kind === 'user'
+  const canEdit = node.kind === 'user' && human && allowed && rollback !== undefined && editPrompt !== undefined
+  if (editing && editPrompt !== undefined) return (
+    <PromptEditor text={contentParts(data.content).text} unavailable={running} t={t}
+      onCancel={cancelEdit}
+      onSend={async (text) => {
+        const content = [{ type: 'text' as const, text }, ...data.content.filter(block => block.type !== 'text')]
+        await editPrompt(data.seq as SessionSeq, content)
+      }} />
+  )
   return (
     <UserStyleBubble
       node={node}
@@ -352,6 +377,14 @@ export const UserMessageNodeView = memo(function UserMessageNodeView({
           text={text}
           time={data.time}
           clock="start"
+          onEdit={canEdit ? () => { setEditing(true) } : undefined}
+          editUnavailable={running}
+          editButtonRef={(button) => {
+            if (button !== null && restoreEditFocus.current) {
+              restoreEditFocus.current = false
+              button.focus({ preventScroll: true })
+            }
+          }}
           className={css.actions}
           t={t}
         />

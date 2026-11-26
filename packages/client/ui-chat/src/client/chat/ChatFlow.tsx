@@ -24,7 +24,7 @@ function isTranscriptEcho(item: PendingInput): boolean {
 
 /** Render the flow without adding a DOM parent or changing keyed row positions. */
 export const ChatFlow = memo(function ChatFlow({
-  entries, pendingInputs, lastInputTurn, deferCollapse,
+  entries, pendingInputs, lastInputTurn, deferCollapse, rolledBackTurns,
   useSession, useChat, useChatNode, useChatNodeBottom, useChatNodeProcess, useChatGroup, usePresentation, useConnectionState,
   useStore, actions, renderSlot, renderFactorySlot, t, useGroupAction, useGroupHeaderAction,
   cwd, openFile, inspectCall, forkAt, loadImage,
@@ -46,7 +46,7 @@ export const ChatFlow = memo(function ChatFlow({
   const holding = !running && latestTurnOpen
   const seatProps = {
     nodeStore, useChatNode, useChatNodeBottom, useChatNodeProcess, usePresentation,
-    useStore, actions, renderSlot, t, useGroupAction, deferCollapse,
+    useStore, actions, renderSlot, t, useGroupAction, deferCollapse, rolledBackTurns,
     cwd, openFile, inspectCall, forkAt, loadImage,
   }
   const rows = entries.map((entry) => {

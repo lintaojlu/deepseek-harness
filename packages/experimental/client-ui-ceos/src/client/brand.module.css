@@ -1,0 +1,45 @@
+/* Fraunces subset for C, E, O, and S at weight 800. License: fonts/OFL.txt. */
+@font-face {
+  font-family: "Fraunces CEOS";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("data:font/woff2;base64,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") format("woff2");
+}
+
+.name {
+  display: grid;
+  grid-template-rows: 13px 11px;
+  min-width: 0;
+  letter-spacing: normal;
+}
+
+.wordmark {
+  min-width: 0;
+  overflow: hidden;
+  font-family: "Fraunces CEOS", Fraunces, "Noto Serif SC", "Songti SC", Georgia, serif;
+  font-optical-sizing: auto;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 13px;
+  color: var(--dsw-alias-label-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagline {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mark {
+  display: block;
+  flex: none;
+}

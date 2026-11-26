@@ -3,8 +3,23 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/user/index.md
 /:
-  en: dc6b778eb6f830d6
-  zh: dc6b778eb6f830d6
+  en: ea8da4cc84d4c8d0
+  zh: ea8da4cc84d4c8d0
 /deepseek-harness:
-  en: 3a39bd0977f30953
-  zh: f8f5b9b5006bbe01
+  en: 7af995ae4b442b58
+  zh: 831af8ccfc3ca5be
+/deepseek-harness/learning-paths:
+  en: 72ccf38ead8f5e46
+  zh: 70e7f5120dc2f433
+/deepseek-harness/learning-paths/use-dsh:
+  en: 5f549b38531a5608
+  zh: 752deabbc47155f2
+/deepseek-harness/learning-paths/build-a-plugin:
+  en: 5d3dc156a8bb8bba
+  zh: ff491137d4717fa6
+/deepseek-harness/learning-paths/explore-the-architecture:
+  en: 57823882eadb88a9
+  zh: cf79bd77877113e3
+/deepseek-harness/quick-reference:
+  en: 61c35c01c639abec
+  zh: 90d8f63bf575dec4

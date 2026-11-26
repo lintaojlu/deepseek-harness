@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.2-rc.1/auto-todo-not-official/guide.md
+/:
+  en: 9a4c24473712e5e2
+  zh: c9d467c7f417bf77
+/install-auto-todo-as-a-profile-plugin:
+  en: 1a398ab2fd1f35fb
+  zh: 0312709b131f543f
+/install-auto-todo-as-a-profile-plugin/change:
+  en: 6243ad5ddb8c2a9c
+  zh: 49175d96ec9efc0c
+/install-auto-todo-as-a-profile-plugin/migration:
+  en: d7adc2e0e626121c
+  zh: 2822a31d26d10d87

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "DeepSeek Harness · 插件运行架构",
+    "locale": "zh-CN",
+    "output": ".archify/architecture-deepseek-harness-20261112-015814/deepseek-harness.html",
+    "quality_profile": "showcase",
+    "repository": {"url": "https://github.com/lintaojlu/deepseek-harness.git", "revision": "fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159"}
+  },
+  "components": [
+    {"id":"web", "type":"frontend", "label":"Web / 桌面界面", "sublabel":"会话交互与状态展示", "pos":[40,40], "size":[180,76], "sources":[{"path":"packages/api/session-controller/src/client/sessions/session.ts","line":250,"end_line":277},{"path":"docs/architecture.md","line":49,"end_line":53}]},
+    {"id":"api", "type":"backend", "label":"会话 API", "sublabel":"Typert Remote · 输入接纳", "pos":[380,40], "size":[180,76], "sources":[{"path":"packages/api/session-controller/src/commands.ts","line":315,"end_line":375},{"path":"packages/api/session-controller/src/control.ts","line":16,"end_line":73},{"path":"packages/api/session-controller/src/agent.ts","line":124,"end_line":143}]},
+    {"id":"loop", "type":"backend", "label":"Agent Loop", "sublabel":"上下文组装 · 多步执行", "pos":[720,40], "size":[180,76], "sources":[{"path":"packages/core/agent-loop/src/agent.ts","line":450,"end_line":497},{"path":"packages/core/agent-loop/src/agent.ts","line":566,"end_line":603},{"path":"packages/core/agent-loop/src/index.ts","line":660,"end_line":707}]},
+    {"id":"llm", "type":"backend", "label":"模型适配层", "sublabel":"绑定模型 · 流式响应", "pos":[1040,40], "size":[180,76], "sources":[{"path":"packages/llm/llm/src/index.ts","line":955,"end_line":1023},{"path":"docs/architecture.md","line":55,"end_line":65}]},
+    {"id":"session", "type":"messagebus", "label":"Session 事件日志", "sublabel":"历史投影 · 持久化协调", "pos":[380,240], "size":[180,76], "sources":[{"path":"docs/architecture.md","line":124,"end_line":132},{"path":"packages/core/agent-loop/src/index.ts","line":678,"end_line":707},{"path":"packages/core/tools/src/batch.ts","line":236,"end_line":265}]},
+    {"id":"disk", "type":"database", "label":"JSONL 会话文件", "sublabel":"版本化文件 · Zstandard", "pos":[40,240], "size":[180,76], "sources":[{"path":"packages/session/session-persistence-jsonl/src/index.ts","line":1,"end_line":43},{"path":"packages/session/session-persistence-jsonl/src/index.ts","line":93,"end_line":104},{"path":"docs/architecture.md","line":128,"end_line":130}]},
+    {"id":"tools", "type":"security", "label":"工具注册与执行", "sublabel":"策略门禁 · 审批 · 调度", "pos":[720,440], "size":[180,76], "sources":[{"path":"packages/core/tools/src/pipeline.ts","line":190,"end_line":229},{"path":"packages/core/tools/src/pipeline.ts","line":253,"end_line":302},{"path":"packages/core/tools/src/batch.ts","line":50,"end_line":94}]},
+    {"id":"shell", "type":"backend", "label":"Shell 执行能力", "sublabel":"沙箱策略 · 托管子进程", "pos":[380,440], "size":[180,76], "sources":[{"path":"packages/shell/tool-bash/src/index.ts","line":1,"end_line":34},{"path":"packages/shell/bash-sandbox/src/index.ts","line":29,"end_line":46},{"path":"packages/shell/bash-local/src/index.ts","line":90,"end_line":98}]}
+  ],
+  "connections": [
+    {"id":"web-api", "from":"web", "to":"api", "label":"Remote 调用", "variant":"emphasis"},
+    {"id":"api-loop", "from":"api", "to":"loop", "label":"输入入队", "variant":"emphasis"},
+    {"id":"loop-llm", "from":"loop", "to":"llm", "label":"模型请求", "variant":"emphasis"},
+    {"id":"loop-tools", "from":"loop", "to":"tools", "label":"工具调用", "variant":"emphasis"},
+    {"id":"tools-shell", "from":"tools", "to":"shell", "label":"获准后执行", "variant":"security"},
+    {"id":"loop-session", "from":"loop", "to":"session", "label":"记录消息"},
+    {"id":"tools-session", "from":"tools", "to":"session", "label":"调用与结果"},
+    {"id":"session-disk", "from":"session", "to":"disk", "label":"持久化句柄"}
+  ],
+  "cards": [
+    {"dot":"cyan", "title":"所有组件均以插件组合", "items":["Profile 选择有序 Bundle，Cordis 挂载服务、事件与可撤销注册；上层 patch 调整配置。", "Web、headless、SDK 和 ACP 共用能力；桌面应用承载完整 Web 应用。依据：docs/architecture.md:9–27、49–53。"]},
+    {"dot":"emerald", "title":"一次输入如何推进", "items":["会话 API 接纳输入后调用 steer / followup；Agent Loop 组装上下文并绑定模型适配器。", "模型返回工具调用时进入执行管线；工具结果进入日志并驱动后续步骤，无工具调用时完成。", "图中箭头表示主要调用或写入方向；模型流式返回、工具返回及界面订阅在对应调用中完成。"]},
+    {"dot":"amber", "title":"日志与执行的职责", "items":["Session 日志重建模型历史；API 通过投影基线和更新流展示会话状态。", "工具执行先通过策略、必要审批和守卫；Shell 再应用所选沙箱模式，子进程由托管服务管理。", "这是仓库运行概览：以 Shell 展示执行能力，文件、浏览器、MCP、子代理等扩展未逐一展开。源码依据固定到当前提交，不包含工作区未提交修改。"]}
+  ]
+}

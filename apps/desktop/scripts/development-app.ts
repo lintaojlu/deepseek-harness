@@ -1,8 +1,9 @@
 /** macOS development bundle that loads the current workspace through Electron. */
 import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 /** Workspace and runtime settings captured for Launch Services cold starts. */
 export interface DevelopmentAppOptions {
@@ -15,9 +16,24 @@ export interface DevelopmentAppOptions {
   readonly rendererPort: number
   readonly hostPort: number
   readonly openDevtools: string
+  /** Primary-runtime directory prepared for this development target. */
+  readonly primaryRuntime: string
 }
 
+/** CEOS mark installed as the development bundle's Dock and Finder icon. */
+const DEVELOPMENT_DOCK_ICON = fileURLToPath(new URL('../resources/icon-ceos.icns', import.meta.url))
+
 function quote(value: string): string { return `'${value.replaceAll("'", "'\\''")}'` }
+
+/**
+ * Icon file declared by the copied Electron bundle.
+ * @param plist - Bundle `Info.plist`.
+ * @returns Resource file name, including the `.icns` suffix.
+ */
+function developmentDockIconName(plist: string): string {
+  const declared = execFileSync('/usr/bin/plutil', ['-extract', 'CFBundleIconFile', 'raw', '-o', '-', plist], { encoding: 'utf8' }).trim()
+  return declared.endsWith('.icns') ? declared : `${declared}.icns`
+}
 
 /**
  * Prepare and register a disposable .app without changing the installed Electron package.
@@ -30,7 +46,12 @@ export function prepareDevelopmentApp(options: DevelopmentAppOptions): string {
   const executable = join(bundle, 'Contents', 'MacOS', 'HarnessDev')
   const stamp = join(bundle, 'Contents', 'Resources', 'dsh-development.json')
   const launcher = developmentLauncher(options, bundle)
-  const identity = JSON.stringify({ ...options, launcher, plist: readFileSync(join(source, 'Contents', 'Info.plist'), 'utf8') })
+  const identity = JSON.stringify({
+    ...options,
+    launcher,
+    plist: readFileSync(join(source, 'Contents', 'Info.plist'), 'utf8'),
+    dockIcon: createHash('sha256').update(readFileSync(DEVELOPMENT_DOCK_ICON)).digest('hex'),
+  })
   if (!existsSync(stamp) || readFileSync(stamp, 'utf8') !== identity) {
     rmSync(bundle, { recursive: true, force: true })
     execFileSync('/usr/bin/ditto', [source, bundle])
@@ -45,6 +66,7 @@ export function prepareDevelopmentApp(options: DevelopmentAppOptions): string {
     for (const [key, value] of Object.entries(values)) {
       execFileSync('/usr/bin/plutil', ['-replace', key, '-json', JSON.stringify(value), plist])
     }
+    copyFileSync(DEVELOPMENT_DOCK_ICON, join(bundle, 'Contents', 'Resources', developmentDockIconName(plist)))
     writeFileSync(executable, launcher, { mode: 0o755 })
     writeFileSync(stamp, identity, { mode: 0o600 })
     execFileSync('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', bundle], { stdio: 'pipe' })
@@ -63,6 +85,7 @@ export function developmentLauncher(options: DevelopmentAppOptions, bundle: stri
   const environment = {
     DSH_HOME: options.home,
     DSH_DESKTOP_DEV_APP: '1',
+    DSH_DESKTOP_PRIMARY_RUNTIME_DIR: options.primaryRuntime,
     DSH_DESKTOP_HOST_INSPECT_PORT: String(options.hostPort),
     DSH_DESKTOP_OPEN_DEVTOOLS: options.openDevtools,
     ELECTRON_ENABLE_LOGGING: '1',

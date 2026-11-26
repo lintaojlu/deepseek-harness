@@ -234,7 +234,7 @@ const REPOSITORY_BADGE = /^\[!\[[^\]]*\]\(https:\/\/img\.shields\.io\/[^)]*\)\]\
  * @param markdown Rewritten canonical Markdown content.
  * @returns The content without the switcher line or the repository badge.
  */
-function withoutRepositoryChrome(markdown: string): string {
+export function projectedPageContent(markdown: string): string {
   const lines = markdown.split('\n')
   const switcher = lines.findIndex(line => LANGUAGE_SWITCHER.test(line))
   // Only the switcher introducing the page qualifies; further down the same
@@ -247,26 +247,6 @@ function withoutRepositoryChrome(markdown: string): string {
     lines.splice(lines[badge - 1] === '' ? badge - 1 : badge, lines[badge - 1] === '' ? 2 : 1)
   }
   return lines.join('\n')
-}
-
-/**
- * Select the Markdown rendered for one published page.
- *
- * @param markdown Rewritten canonical Markdown content.
- * @param page Publication manifest entry for the content.
- * @returns Full Markdown for ordinary pages or frontmatter-only Markdown for a locale home page.
- */
-export function projectedPageContent(markdown: string, page: DocsPage): string {
-  if (page.sidebar !== null) return withoutRepositoryChrome(markdown)
-  if (!markdown.startsWith('---\n')) {
-    throw new Error(`project-doc-site: locale home source ${JSON.stringify(page.source)} must start with YAML frontmatter.`)
-  }
-  const closingDelimiter = '\n---\n'
-  const closing = markdown.indexOf(closingDelimiter, 4)
-  if (closing === -1) {
-    throw new Error(`project-doc-site: locale home source ${JSON.stringify(page.source)} has unclosed YAML frontmatter.`)
-  }
-  return markdown.slice(0, closing + closingDelimiter.length)
 }
 
 /**
@@ -421,7 +401,7 @@ function projectPagesInto(
 export function projectDocs(): void {
   rmSync(generatedRoot, { recursive: true, force: true })
   projectPagesInto(generatedRoot, defaultProjectionContext(), (markdown, page) =>
-    addProjectionFrontmatter(projectedPageContent(markdown, page), page))
+    addProjectionFrontmatter(projectedPageContent(markdown), page))
 }
 
 /**
@@ -444,16 +424,14 @@ function withoutFrontmatter(markdown: string, source: string): string {
 /**
  * The raw-Markdown twin of one published page.
  *
- * Frontmatter is VitePress rendering configuration and is dropped. A locale
- * home page therefore keeps its body here, while the rendered site truncates
- * it to the frontmatter redirect.
+ * Frontmatter is VitePress rendering configuration and is dropped.
  *
  * @param markdown Rewritten canonical Markdown content.
  * @param source Repository-relative page source, named by frontmatter failures.
  * @returns Plain Markdown without frontmatter or repository chrome.
  */
 export function rawMarkdownPageContent(markdown: string, source: string): string {
-  return withoutRepositoryChrome(withoutFrontmatter(markdown, source))
+  return projectedPageContent(withoutFrontmatter(markdown, source))
 }
 
 /**

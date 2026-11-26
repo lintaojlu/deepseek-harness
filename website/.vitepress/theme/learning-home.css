@@ -1,0 +1,139 @@
+.VPHome:has(.learning-routes) {
+  --learning-accent: var(--vp-c-brand-1);
+  --learning-tint: var(--vp-c-brand-soft);
+  background: radial-gradient(ellipse 62% 18rem at 82% 0, var(--learning-tint), transparent);
+  padding-block: clamp(48px, 8vw, 104px) 60px;
+  margin-bottom: 0;
+}
+
+.VPHome .vp-doc:has(.learning-routes) h1 {
+  color: var(--vp-c-text-1);
+  font-size: clamp(2rem, 5.8vw, 4.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+.VPHome .vp-doc:has(.learning-routes) p:first-of-type {
+  max-width: 48ch;
+  color: var(--vp-c-text-2);
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  line-height: 1.65;
+}
+
+.VPHome .vp-doc:has(.learning-routes) p:nth-of-type(2) > a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 18px;
+  background: var(--vp-button-brand-bg);
+  color: var(--vp-button-brand-text);
+  text-decoration: none;
+}
+
+.VPHome .vp-doc:has(.learning-routes) p:nth-of-type(2) > a:hover {
+  background: var(--vp-button-brand-hover-bg);
+  color: var(--vp-button-brand-hover-text);
+}
+
+.VPHome .vp-doc:has(.learning-routes) h2 {
+  border-top: 0;
+  margin-top: clamp(30px, 6vw, 64px);
+  padding-top: 0;
+}
+
+.learning-routes {
+  display: grid;
+  gap: 16px;
+  margin-block: 20px 0;
+}
+
+@media (min-width: 900px) {
+  .learning-routes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.learning-route {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  padding: clamp(16px, 2vw, 24px);
+  background: var(--vp-c-bg-soft);
+}
+
+.VPHome .learning-route h3 { margin: 0 0 16px; }
+
+.VPHome .learning-route ol {
+  display: grid;
+  padding: 0;
+  margin: 0;
+}
+
+.VPHome .learning-route li {
+  position: relative;
+  padding: 0 0 14px;
+  margin: 0 0 0 28px;
+  color: var(--learning-accent);
+  overflow-wrap: anywhere;
+}
+
+.VPHome .learning-route li::marker { font-weight: 650; }
+
+.VPHome .learning-route li:not(:last-child)::after {
+  position: absolute;
+  top: 24px;
+  bottom: 3px;
+  left: -16px;
+  width: 1px;
+  background: var(--vp-c-divider);
+  content: '';
+}
+
+.VPHome .learning-route li:last-child { padding-bottom: 0; }
+
+.VPHome .learning-route a {
+  color: var(--vp-c-text-1);
+  text-decoration-color: var(--vp-c-divider);
+  text-underline-offset: 0.2em;
+}
+
+.VPHome .learning-route a:hover { color: var(--learning-accent); }
+
+.VPHome .learning-reference ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+  gap: 10px;
+  padding: 0;
+  margin-block: 16px 0;
+  list-style: '';
+}
+
+.VPHome .learning-reference li { margin: 0; }
+
+.VPHome .learning-reference a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.VPHome .learning-reference a:hover { background: var(--learning-tint); }
+
+.VPHome .vp-doc:has(.learning-routes) a:focus-visible {
+  outline: 2px solid var(--learning-accent);
+  outline-offset: 3px;
+}
+
+.Layout:has(.learning-routes) #local-search .DocSearch-Button {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+  .Layout:has(.learning-routes) #local-search .DocSearch-Button { min-width: 176px; }
+}
+
+@media (max-width: 767px) {
+  .Layout:has(.learning-routes) #local-search .DocSearch-Button { height: 40px; }
+}

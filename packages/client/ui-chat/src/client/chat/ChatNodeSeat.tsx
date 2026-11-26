@@ -26,6 +26,8 @@ interface ChatNodeSeatProps extends ChatNodeOwnerProps {
   readonly useChatNodeBottom: ChatFlowSlotProps['useChatNodeBottom']
   readonly deferCollapse: boolean
   readonly useGroupAction: ChatFlowSlotProps['useGroupAction']
+  /** Turn numbers rolled back by edit/resend; group seats hide whole rolled-back Turns. */
+  readonly rolledBackTurns: ReadonlySet<number>
 }
 
 type RoutedChatNodeOwner = {
@@ -50,7 +52,7 @@ function turnOf(node: ChatNode | undefined): number | undefined {
 export const ChatNodeSeat = memo(function ChatNodeSeat({
   nodeKey, groupPart, useChatNode, useChatNodeProcess, usePresentation,
   cwd, openFile, inspectCall, forkAt,
-  loadImage, useStore, actions, renderSlot, t, useChatNodeBottom, deferCollapse, useGroupAction,
+  loadImage, useStore, actions, renderSlot, t, useChatNodeBottom, deferCollapse, useGroupAction, rolledBackTurns,
 }: ChatNodeSeatProps) {
   const bottom = useChatNodeBottom(nodeKey)
   const node = useChatNode(nodeKey)
@@ -144,6 +146,9 @@ export const ChatNodeSeat = memo(function ChatNodeSeat({
     loadImage, turnProcess,
   ])
   if (routedNode === undefined || owner === null) return null
+  // A rolled-back Turn hides every surviving node it owns, including the
+  // turn-process controller whose anchorSeq precedes the reset interval.
+  if (turn !== undefined && rolledBackTurns.has(turn)) return null
   // Runtime dispatch owns the correlation: every Node's discriminant is the
   // keyed-slot entry passed alongside that same Node. TypeScript does not
   // distribute an object containing a union into a union of objects itself.

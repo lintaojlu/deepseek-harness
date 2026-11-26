@@ -7,12 +7,25 @@ import type {
 } from '@deepseek-ai/dsh-attachment'
 import type { Branded } from '@deepseek-ai/dsh-brand'
 import type { LlmAttemptId, MessageId } from '@deepseek-ai/dsh-llm/brand'
-import type { LlmModelBadge, TextBlock } from '@deepseek-ai/dsh-llm'
+import type { ContentBlock, LlmModelBadge, TextBlock } from '@deepseek-ai/dsh-llm'
 import type { SessionId, SessionSeq, SessionSeqCursor } from '@deepseek-ai/dsh-session/types'
 import type { SessionProjectionMap, SessionProjectionSummaryExcluded, SessionProjectionSummaryValues } from '@deepseek-ai/dsh-session-projection/types'
 import type { Principal } from '@deepseek-ai/dsh-typert-protocol'
 import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { WorkspaceId } from '@deepseek-ai/dsh-workspace/types'
+
+/** Replace one historical human prompt within its existing Session. */
+export interface SessionEditPromptRequest {
+  readonly sessionId: SessionId
+  readonly targetSeq: SessionSeq
+  /** Revised text and retained durable attachments. */
+  readonly content: readonly ContentBlock[]
+}
+
+/** Committed interval removed from active Chat and future model requests. */
+export interface SessionEditPromptValue {
+  readonly reset: { readonly startSeq: number; readonly endSeq: number }
+}
 
 declare module '@deepseek-ai/dsh-session-projection/types' {
   interface SessionProjectionMap {
@@ -180,6 +193,10 @@ export const SESSION_SEARCH_SNIPPET_MAX_CODE_POINTS = 240
 
 declare module '@deepseek-ai/dsh-typert-protocol' {
   interface RemoteErrorDetailsMap {
+    /** The optional prompt-edit backend is not mounted. */
+    'session/rollback-not-mounted': Record<string, never>
+    /** Editing was refused before commit, or committed with an uncertain resend outcome. */
+    'session/rollback-failed': { readonly reason: string; readonly committed: boolean }
     /** A wait observation ended before a stopping state; the caller should reread. */
     'session/observation-ended': Record<string, never>
     /** No state arrived before the deadline; a timeout after a state returns its value instead. */

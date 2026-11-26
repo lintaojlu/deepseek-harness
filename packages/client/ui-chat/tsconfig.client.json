@@ -64,6 +64,9 @@
       "path": "../../session/session-turn-outline"
     },
     {
+      "path": "../../compaction/rollback"
+    },
+    {
       "path": "../../subagent/subagent"
     },
     {

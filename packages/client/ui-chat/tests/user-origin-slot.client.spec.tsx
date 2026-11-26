@@ -6,7 +6,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render } from '@testing-library/react'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { PropsRenderSlots } from '@deepseek-ai/dsh-client-ui-slots'
 import { zh as commonZh } from '@deepseek-ai/dsh-client-locale/src/locales/zh.ts'
@@ -14,12 +14,13 @@ import type {
   ChatConversationViewNode, SteeringMessageNode, UserMessageNode,
 } from '@deepseek-ai/dsh-client-ui-chat/client'
 import type { ChatNodeViewProps, UserContentInput } from '../src/client/contract/slots.ts'
+import { AttachmentId } from '@deepseek-ai/dsh-attachment'
 import { UserMessageNodeView } from '../src/client/chat/MessageItem.tsx'
 import { zh } from '../src/client/locale.ts'
 import { createUserContentFixture } from './user-content-component-fixture.tsx'
 import { unusedImageLoader } from './reasoning-component-fixture.tsx'
 
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 const t: ChatNodeViewProps['t'] = makeTranslate(zh, commonZh)
 type UserSlots = PropsRenderSlots<'conversation.chat.user.before'>
@@ -33,7 +34,10 @@ const userSlots: UserSlots = {
 const SHARED = { kind: 'user', principal: { kind: 'share-viewer', shareId: 'share-1', actor: { subjectId: 'subject-42' } } }
 
 let renderUserContent: ReturnType<typeof createUserContentFixture>
-beforeEach(() => { renderUserContent = createUserContentFixture() })
+beforeEach(() => {
+  renderUserContent = createUserContentFixture()
+  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+})
 
 const renderUserFactory: ChatNodeViewProps['renderFactorySlot'] = (name, input) => {
   if (name !== 'conversation.chat.user.content') throw new Error(`Unexpected Chat Factory: ${name}`)
@@ -55,6 +59,7 @@ function viewProps(data: UserMessageNode | SteeringMessageNode): ChatNodeViewPro
   } as ChatConversationViewNode
   const props: Partial<Omit<ChatNodeViewProps, 'node'>> & { node: ChatConversationViewNode } = {
     node, t, loadImage: unusedImageLoader, renderFactorySlot: renderUserFactory, openFile: vi.fn(),
+    useSession: selector => selector({ running: false } as never), useProjection: () => undefined, useAccess: () => true,
   }
   return props as ChatNodeViewProps<'user' | 'steering'>
 }
@@ -77,6 +82,45 @@ const steeringData: SteeringMessageNode = {
 }
 
 describe('official user renderer origin seat', () => {
+  it('edits the original prompt in place, restores focus on cancel, and resends without creating a session', async () => {
+    const editPrompt = vi.fn().mockResolvedValue(undefined)
+    const props = { ...viewProps(userData), useProjection: () => ({ resets: [] }) as never }
+    const view = render(<UserMessageNodeView {...props} {...userSlots} editPrompt={editPrompt} />)
+    fireEvent.click(view.getByRole('button', { name: '编辑消息' }))
+    expect((view.getByRole('textbox') as HTMLTextAreaElement).value).toBe('hello')
+    fireEvent.change(view.getByRole('textbox'), { target: { value: 'discarded draft' } })
+    fireEvent.click(view.getByRole('button', { name: '取消' }))
+    expect(view.getByText('hello')).toBeTruthy()
+    expect(document.activeElement).toBe(view.getByRole('button', { name: '编辑消息' }))
+    expect(editPrompt).not.toHaveBeenCalled()
+    fireEvent.click(view.getByRole('button', { name: '编辑消息' }))
+    fireEvent.change(view.getByRole('textbox'), { target: { value: 'new prompt' } })
+    await act(async () => { fireEvent.click(view.getByRole('button', { name: '发送' })) })
+    expect(editPrompt).toHaveBeenCalledExactlyOnceWith(7, [{ type: 'text', text: 'new prompt' }])
+  })
+
+  it('preserves file attachments when revising the text', async () => {
+    const file = { type: 'file' as const, attachment: { attachmentId: AttachmentId(`sha256:${'b'.repeat(64)}`), name: 'notes.txt', bytes: 23 } }
+    const data = { ...userData, content: [...userData.content, file] }
+    const editPrompt = vi.fn().mockResolvedValue(undefined)
+    const props = { ...viewProps(data), useProjection: () => ({ resets: [] }) as never }
+    const view = render(<UserMessageNodeView {...props} {...userSlots} editPrompt={editPrompt} />)
+    fireEvent.click(view.getByRole('button', { name: '编辑消息' }))
+    fireEvent.change(view.getByRole('textbox'), { target: { value: 'Read this attachment' } })
+    await act(async () => { fireEvent.click(view.getByRole('button', { name: '发送' })) })
+    expect(editPrompt).toHaveBeenCalledExactlyOnceWith(7, [{ type: 'text', text: 'Read this attachment' }, file])
+  })
+
+  it('keeps the pencil unavailable during an active task', () => {
+    const props = { ...viewProps(userData), useProjection: () => ({ resets: [] }) as never,
+      useSession: ((select: (value: { running: boolean }) => unknown) => select({ running: true })) as ChatNodeViewProps['useSession'] }
+    const view = render(<UserMessageNodeView {...props} {...userSlots} editPrompt={vi.fn()} />)
+    const pencil = view.getByRole('button', { name: '编辑消息' })
+    expect(pencil.getAttribute('aria-disabled')).toBe('true')
+    fireEvent.click(pencil)
+    expect(view.queryByRole('textbox')).toBeNull()
+  })
+
   it('renders the source chain above the bubble and passes the durable source', () => {
     const renderSlotChain = vi.fn(() => <span data-test-origin="">来自会话分享</span>)
     const view = render(<UserMessageNodeView {...viewProps(userData)} {...userSlots} renderSlotChain={renderSlotChain} />)

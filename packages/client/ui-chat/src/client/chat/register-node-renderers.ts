@@ -8,7 +8,7 @@ import { sessionFilePath } from '../file-path.ts'
 import { CommandNodeView, ManualCompactionNodeView } from './CommandNodeView.tsx'
 import {
   CompactionNodeView, ContextMessageNodeView, RetryNodeView, TurnErrorNodeView,
-  TurnMaxTokensNodeView, UnknownNodeView, UserMessageNodeView,
+  TurnMaxTokensNodeView, UnknownNodeView, UserMessageNodeView, type UserMessageEditInjected,
 } from './MessageItem.tsx'
 import { DefaultReasoningBody, ReasoningContent } from './ReasoningContent.tsx'
 import { SystemPromptNodeView } from './SystemPromptRow.tsx'
@@ -41,6 +41,12 @@ export function registerChatNodeRenderers(
   ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({
     name: 'conversation.chat.node', key: 'user', locale: NS,
     children: { 'conversation.chat.user.before': { kind: 'chain', scope: 'session' } },
+    inject: sessionId => ({
+      editPrompt: async (targetSeq, content) => {
+        const result = await ctx.remote.session.editPrompt({ sessionId, targetSeq, content })
+        if (!result.ok) throw new Error(result.error.message)
+      },
+    } satisfies UserMessageEditInjected),
   }, UserMessageNodeView))
   // Steering rows share the renderer without owning the message-source seat.
   ctx.slots.inject('conversation.chat.node', () => ctx.slots.register({

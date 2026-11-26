@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4c15dd2b-e9fc-4acc-9bae-8be67fe1a0e4",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/candidate.json",
+  "output": "/Users/nil/Experiment/agent-harness-selection/deepseek-harness/.archify/architecture-deepseek-harness-20261112-015814/deepseek-harness.html",
+  "specification": {
+    "sha256": "1bde4d708daa660483d857f8d62e0b02cb1ce866ee39a4df8190ef1664d23e78",
+    "bytes": 5353
+  },
+  "artifact": {
+    "sha256": "7a4dab4ec3440e3c84d81e1a9a1ab154fa06982e7eb1919571def92dc0e3f1e9",
+    "bytes": 848944
+  }
+}

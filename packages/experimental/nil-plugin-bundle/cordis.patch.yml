@@ -1,0 +1,9 @@
+- insert:
+    - id: auto-todo
+      name: '@deepseek-ai/dsh-client-ui-auto-todo'
+    - id: whiteboard
+      name: '@deepseek-ai/dsh-client-ui-whiteboard'
+    - id: ceos-ui
+      name: '@deepseek-ai/dsh-client-ui-ceos'
+    - id: rollback
+      name: '@deepseek-ai/dsh-rollback'
