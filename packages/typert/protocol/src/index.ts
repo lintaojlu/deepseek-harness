@@ -267,11 +267,13 @@ export abstract class TypertRemoteService<out T = never> extends Service<T> {
  * Make `ctx.invocation` read as `undefined` outside a Remote call instead of the
  * reflect service's "cannot get property" error; a call-derived Context shadows
  * the accessor with its own property. The first Remote Service constructed in a
- * tree registers it on the root, where it outlives any one Service.
+ * tree registers it on the root, where it outlives any one Service. Desktop
+ * hosts using Cordis 4.1 expose the same root through `ctx.root`.
  */
 function provideInvocationAccessor(ctx: Context): void {
-  if (Object.hasOwn(ctx[Context.root].reflect.props, 'invocation')) return
-  ctx[Context.root].accessor('invocation', { get: () => undefined })
+  const root = ctx[Context.root] ?? (ctx as Context & { root: Context }).root
+  if (Object.hasOwn(root.reflect.props, 'invocation')) return
+  root.accessor('invocation', { get: () => undefined })
 }
 
 /**

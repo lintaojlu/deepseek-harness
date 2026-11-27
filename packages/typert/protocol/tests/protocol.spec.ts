@@ -287,6 +287,17 @@ describe('typert-protocol Remote declarations', () => {
     expect(child.ctx.invocation).toBeUndefined()
   })
 
+  it('registers the invocation accessor on a host that exposes ctx.root', () => {
+    const root = new Context()
+    Object.defineProperty(root, Context.root, { value: undefined })
+    Object.defineProperty(root, 'root', { value: root })
+
+    bindTypertRemote({ ctx: root.extend() }, 'legacyHost')
+
+    expect(Object.hasOwn(root.reflect.props, 'invocation')).toBe(true)
+    expect(root.invocation).toBeUndefined()
+  })
+
   it('provides the invocation accessor for a plain Service bound with bindTypertRemote', async () => {
     const root = new Context()
     expect(Object.hasOwn(root.reflect.props, 'invocation')).toBe(false)
